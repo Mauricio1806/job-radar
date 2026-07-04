@@ -1,0 +1,345 @@
+# ═══════════════════════════════════════════════════════════════════════
+# COMPANIES v3.1 — refinado pós-primeira-execução
+# ═══════════════════════════════════════════════════════════════════════
+# Mudanças:
+# - Handles ATS verificados pras empresas EU sponsor (estavam falhando no detect)
+# - Removidos handles inválidos (Avenga teamtailor/app, Very lever/very)
+# - Comentadas empresas SPA sem ATS detectável (Zalando, SAP, Booking, Siemens, etc.)
+#   Essas vão precisar de Playwright no futuro. Por ora ficam fora.
+# ═══════════════════════════════════════════════════════════════════════
+
+companies:
+
+  # ┌─────────────────────────────────────────────────────────────────┐
+  # │ TIER A — TALENT NETWORKS (manual signup, sem scrape)            │
+  # └─────────────────────────────────────────────────────────────────┘
+
+  - name: Athyna
+    url: https://www.athyna.com/talent
+    strategy: manual_network
+    tier_priority: A
+    phase: 1
+    notes: "LATAM + USD. Apply via talent pool. Screening required."
+
+  - name: Terminal
+    url: https://www.terminal.io/engineers
+    strategy: manual_network
+    tier_priority: A
+    phase: 1
+
+  - name: Toptal
+    url: https://www.toptal.com/talent/apply
+    strategy: manual_network
+    tier_priority: A
+    phase: 1
+    notes: "Top 3% screening. Multi-step interview."
+
+  - name: Andela
+    url: https://andela.com/talent
+    strategy: manual_network
+    tier_priority: A
+    phase: 1
+
+  - name: Braintrust
+    url: https://www.usebraintrust.com/join
+    strategy: manual_network
+    tier_priority: A
+    phase: 1
+
+  - name: X-Team
+    url: https://x-team.com/developers
+    strategy: manual_network
+    tier_priority: A
+    phase: 1
+
+  - name: Arc.dev
+    url: https://arc.dev/remote-jobs
+    strategy: manual_network
+    tier_priority: A
+    phase: 1
+
+  - name: Gun.io
+    url: https://gun.io/developers
+    strategy: manual_network
+    tier_priority: A
+    phase: 1
+
+  - name: A.Team
+    url: https://www.a.team/join
+    strategy: manual_network
+    tier_priority: A
+    phase: 1
+
+  - name: Lemon.io
+    url: https://lemon.io/developers
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: Proxify
+    url: https://proxify.io/developers
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: Remotebase
+    url: https://remotebase.com/talent
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: CloudDevs
+    url: https://clouddevs.com/join-as-developer
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  # ┌─────────────────────────────────────────────────────────────────┐
+  # │ STAFF AUG / USD CONTRACTOR — confirmados funcionais             │
+  # └─────────────────────────────────────────────────────────────────┘
+
+  # ┌─────────────────────────────────────────────────────────────────┐
+  # │ CONSULTORIAS GLOBAIS — HTML scrapers customizados (novo no v5)  │
+  # │ Não usam Greenhouse/Lever — HTML parsing direto                 │
+  # └─────────────────────────────────────────────────────────────────┘
+
+  - name: DataArt
+    url: https://www.dataart.team/vacancies
+    strategy: global_consulting
+    tier_priority: C
+    phase: 1
+    ats: dataart
+    handle: all
+    notes: "HTML scraper. ~158 vagas total. Tem categoria Data."
+
+  - name: SoftServe
+    url: https://career.softserveinc.com/en-us/vacancies
+    strategy: global_consulting
+    tier_priority: C
+    phase: 1
+    ats: softserve
+    handle: data
+    notes: "HTML scraper. ~232 vagas (5 páginas). Categoria Data & Analytics."
+
+  - name: Intellias
+    url: https://career.intellias.com/vacancies/
+    strategy: global_consulting
+    tier_priority: C
+    phase: 1
+    ats: intellias
+    handle: data-engineering
+    notes: "HTML scraper. ~149 vagas, 5 em Data Engineering family."
+
+  - name: Truelogic
+    url: https://www.truelogicsoftware.com/careers
+    strategy: usd_contractor
+    tier_priority: B
+    phase: 1
+    ats: ashby
+    handle: truelogic
+    notes: "Confirmado funcional (213 jobs)"
+
+  - name: Netguru
+    url: https://www.netguru.com/jobs
+    strategy: global_consulting
+    tier_priority: C
+    phase: 1
+    ats: workable
+    handle: netguru
+    notes: "Confirmado funcional (32 jobs)"
+
+  # ┌─────────────────────────────────────────────────────────────────┐
+  # │ JOB BOARD AGGREGATORS — confirmados funcionais (alta alavanca)  │
+  # └─────────────────────────────────────────────────────────────────┘
+
+  - name: Remotive
+    url: https://remotive.com/remote-jobs
+    strategy: job_board_aggregator
+    tier_priority: A
+    phase: 1
+    ats: remotive
+    handle: data
+    notes: "33 jobs na primeira run"
+
+  - name: Remote OK
+    url: https://remoteok.com/
+    strategy: job_board_aggregator
+    tier_priority: A
+    phase: 1
+    ats: remoteok
+    handle: data-engineer
+
+  - name: Himalayas
+    url: https://himalayas.app/jobs
+    strategy: job_board_aggregator
+    tier_priority: A
+    phase: 1
+    ats: himalayas
+    handle: data-engineer
+    notes: "20 jobs na primeira run"
+
+  - name: Arbeitnow
+    url: https://www.arbeitnow.com/visa-sponsorship-jobs
+    strategy: job_board_aggregator
+    tier_priority: A
+    phase: 2
+    ats: arbeitnow
+    handle: visa-sponsorship
+
+  - name: We Work Remotely
+    url: https://weworkremotely.com/remote-jobs
+    strategy: job_board_aggregator
+    tier_priority: B
+    phase: 1
+    ats: wwr
+    handle: data
+
+  # ┌─────────────────────────────────────────────────────────────────┐
+  # │ EU SPONSOR — handles ATS hardcoded (verificados manualmente)    │
+  # └─────────────────────────────────────────────────────────────────┘
+  # Estes precisam de teste real — alguns podem dar 404 e ser comentados.
+
+  - name: HelloFresh
+    url: https://careers.hellofresh.com/
+    strategy: eu_sponsor
+    tier_priority: A
+    phase: 2
+    ats: greenhouse
+    handle: hellofresh
+
+  - name: N26
+    url: https://n26.com/en-eu/careers
+    strategy: eu_sponsor
+    tier_priority: A
+    phase: 2
+    ats: greenhouse
+    handle: n26
+
+  - name: Trade Republic
+    url: https://traderepublic.com/careers
+    strategy: eu_sponsor
+    tier_priority: A
+    phase: 2
+    ats: greenhouse
+    handle: traderepublic
+
+  - name: Delivery Hero
+    url: https://careers.deliveryhero.com/
+    strategy: eu_sponsor
+    tier_priority: A
+    phase: 2
+    ats: smartrecruiters
+    handle: DeliveryHero
+
+  - name: Stripe
+    url: https://stripe.com/jobs
+    strategy: eu_sponsor
+    tier_priority: A
+    phase: 2
+    ats: greenhouse
+    handle: stripe
+
+  - name: Personio
+    url: https://www.personio.com/about-personio/careers/
+    strategy: eu_sponsor
+    tier_priority: B
+    phase: 2
+    ats: personio
+    handle: personio
+
+  - name: Contentful
+    url: https://www.contentful.com/careers/
+    strategy: eu_sponsor
+    tier_priority: B
+    phase: 2
+    ats: greenhouse
+    handle: contentful
+
+  - name: Glovo
+    url: https://jobs.glovoapp.com/
+    strategy: eu_sponsor
+    tier_priority: A
+    phase: 2
+    # ats: greenhouse  # handle 'glovo' deu 404 — desabilitado até descobrir handle real
+    notes: "Madrid/Barcelona. Relocation friendly. ATS unknown."
+
+  - name: Mollie
+    url: https://www.mollie.com/jobs
+    strategy: eu_sponsor
+    tier_priority: B
+    phase: 2
+    # ats: greenhouse  # handle 'mollie' deu 404
+
+  - name: TravelPerk
+    url: https://www.travelperk.com/careers/
+    strategy: eu_sponsor
+    tier_priority: A
+    phase: 2
+    # ats: greenhouse  # handle 'travelperk' deu 404
+
+  - name: Typeform
+    url: https://www.typeform.com/careers/
+    strategy: eu_sponsor
+    tier_priority: A
+    phase: 2
+    ats: greenhouse
+    handle: typeform
+
+  - name: Cabify
+    url: https://cabify.com/en/careers
+    strategy: eu_sponsor
+    tier_priority: A
+    phase: 2
+    ats: greenhouse
+    handle: cabify
+
+  - name: GetYourGuide
+    url: https://careers.getyourguide.com/
+    strategy: eu_sponsor
+    tier_priority: B
+    phase: 2
+    ats: greenhouse
+    handle: getyourguide
+
+  - name: Celonis
+    url: https://www.celonis.com/careers/
+    strategy: eu_sponsor
+    tier_priority: A
+    phase: 2
+    ats: greenhouse
+    handle: celonis
+
+  - name: Intercom
+    url: https://www.intercom.com/careers
+    strategy: eu_sponsor
+    tier_priority: B
+    phase: 2
+    ats: greenhouse
+    handle: intercom
+
+  - name: Flix
+    url: https://flix.careers/
+    strategy: eu_sponsor
+    tier_priority: B
+    phase: 2
+    ats: smartrecruiters
+    handle: FlixBus
+
+# ═══════════════════════════════════════════════════════════════════════
+# REMOVIDAS (SPAs sem ATS detectável — precisam Playwright no futuro):
+# Zalando, SAP, Siemens, Bosch, Booking.com, Adyen, ING, Workday,
+# Crossover, Turing, Revelo, Near, VanHack, TECLA, Devlane, Azumo,
+# Nearsure, Rootstrap, Distillery, Scopic, BEON.tech, Switch Software,
+# Tekton Labs, ParallelStaff, DataArt, SoftServe, Ciklum, Exadel,
+# 10Pearls, Alcor, Softermii, Future Processing, Digis, Koombea, Uruit,
+# Intellias, N-iX, Sigma Software, Dev.Pro, Yalantis, Svitla,
+# Working Nomads, Remote.co, Jobspresso, JustRemote, Dynamite Jobs,
+# Wellfound, GermanTechJobs, Relocate.me, AUTO1, Picnic
+#
+# REMOVIDAS (handles inválidos detectados na primeira run):
+# - Avenga (teamtailor/app é falso positivo)
+# - Very (lever/very dá 404)
+#
+# Quando quisermos cobrir essas, ou descobrimos handles reais (rodando
+# busca manual nos sites de careers) ou implementamos Playwright.
+# ═══════════════════════════════════════════════════════════════════════

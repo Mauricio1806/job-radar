@@ -1,0 +1,58 @@
+name: scrape-jobs
+
+on:
+  schedule:
+    - cron: "0 6,12,18,23 * * *"   # 4x/dia UTC (= 03h, 09h, 15h, 20h BRT)
+  workflow_dispatch:
+
+permissions:
+  contents: write   # pra commitar jobs.db e dashboard atualizado
+
+concurrency:
+  group: scrape-jobs
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Detect ATS for new companies
+        run: python pipeline.py detect
+
+      - name: Scrape jobs
+        run: python pipeline.py scrape
+
+      - name: Notify Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python pipeline.py notify
+
+      - name: Update manual signups report
+        run: python pipeline.py manual
+
+      - name: Build dashboard
+        run: python dashboard.py
+
+      - name: Commit data + dashboard
+        run: |
+          git config user.name "job-radar-bot"
+          git config user.email "bot@noreply.github.com"
+          git add data/jobs.db docs/
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "chore: scrape + dashboard $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi
