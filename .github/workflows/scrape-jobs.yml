@@ -49,7 +49,7 @@ jobs:
         run: |
           git config user.name "job-radar-bot"
           git config user.email "bot@noreply.github.com"
-          git add data/jobs.db docs/
+          git add -f data/jobs.db docs/
           if git diff --cached --quiet; then
             echo "no changes"
           else
