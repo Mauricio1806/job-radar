@@ -2,11 +2,11 @@ name: scrape-jobs
 
 on:
   schedule:
-    - cron: "0 6,12,18,23 * * *"   # 4x/dia UTC (= 03h, 09h, 15h, 20h BRT)
+    - cron: "0 6,12,18,23 * * *"   # 4x/dia UTC
   workflow_dispatch:
 
 permissions:
-  contents: write   # pra commitar jobs.db e dashboard atualizado
+  contents: write
 
 concurrency:
   group: scrape-jobs
@@ -31,6 +31,9 @@ jobs:
         run: python pipeline.py detect
 
       - name: Scrape jobs
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
         run: python pipeline.py scrape
 
       - name: Notify Telegram
