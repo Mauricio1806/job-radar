@@ -1,21 +1,19 @@
 """
-Telegram notifier v9
-====================
-Adiciona no output:
-- Domínio final (jazzhr.com, greenhouse.io, etc.) — mostra pra onde o link leva
-- Badge ✓ = ATS confiável | ? = domínio desconhecido
+Telegram notifier v10
+=====================
+- Frescor via posted_at REAL da fonte (Adzuna reporta data original)
+- Mostra empresa REAL (Data Meaning), não "Adzuna Global"
+- Removido texto confuso sobre "via Adzuna"
 """
 
 from __future__ import annotations
 
-import json
 import logging
 import os
 import sqlite3
 import time
 from datetime import datetime, timezone
 from typing import Iterable
-from urllib.parse import urlparse
 
 import requests
 
@@ -25,105 +23,78 @@ TG_API = "https://api.telegram.org"
 MAX_MESSAGE_LEN = 3800
 BATCH_SIZE = 8
 
-CONFIDENT_DOMAINS = {
-    "jazzhr.com", "applytojob.com", "boards.greenhouse.io", "greenhouse.io",
-    "jobs.lever.co", "lever.co", "kenoby.com", "gupy.io",
-    "jobs.ashbyhq.com", "ashbyhq.com", "linkedin.com", "workable.com",
-    "smartrecruiters.com", "workday.com", "myworkdayjobs.com",
-    "solides.jobs", "solides.com", "personio.com", "personio.de",
-    "jobvite.com", "icims.com", "bamboohr.com", "recruitee.com",
-    "teamtailor.com", "breezy.hr", "vagas.com.br", "catho.com.br",
-    "infojobs.com.br", "trampos.co",
-}
 
+def _time_since_posted(posted_at_iso: str | None,
+                        first_seen_iso: str | None) -> tuple[str, str]:
+    """
+    Prioriza posted_at (data real da fonte). Se não tiver, cai pra first_seen.
 
-def _domain_from_url(url: str) -> str:
+    - 🔥🔥 = < 24h posted na fonte (Adzuna reporta data original)
+    - 🔥   = 1-3 dias
+    - ⚡   = 3-7 dias
+    - (sem)= > 7 dias
+    - ❓   = sem data
+    """
+    iso = posted_at_iso or first_seen_iso
+    label_prefix = "postada" if posted_at_iso else "no radar"
+
+    if not iso:
+        return ("data desconhecida", "❓")
     try:
-        return urlparse(url).netloc.lower().lstrip("www.")
-    except Exception:
-        return ""
+        dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        delta = datetime.now(timezone.utc) - dt
+        hours = delta.total_seconds() / 3600
 
-
-def _domain_badge(url: str) -> str:
-    d = _domain_from_url(url)
-    if not d:
-        return ""
-    for known in CONFIDENT_DOMAINS:
-        if known in d:
-            return f"✓ {d}"
-    # Se o link ainda é do Adzuna, sinalizar
-    if "adzuna" in d:
-        return f"⚠️ via Adzuna (não é link direto)"
-    return f"? {d}"
-
-
-def _time_on_radar(first_seen_iso: str | None) -> tuple[str, str]:
-    if not first_seen_iso:
-        return ("agora", "🔥🔥")
-    try:
-        first_seen = datetime.fromisoformat(first_seen_iso.replace("Z", "+00:00"))
-        if first_seen.tzinfo is None:
-            first_seen = first_seen.replace(tzinfo=timezone.utc)
-        delta = datetime.now(timezone.utc) - first_seen
-        minutes = delta.total_seconds() / 60
-
-        if minutes < 5:
-            return ("acabou de aparecer", "🔥🔥")
-        if minutes < 60:
-            return (f"há {int(minutes)}min no radar", "🔥🔥")
-        if minutes < 360:
-            hours = int(minutes / 60)
-            return (f"há {hours}h no radar", "🔥")
-        if minutes < 1440:
-            hours = int(minutes / 60)
-            return (f"há {hours}h no radar", "⚡")
-        if minutes < 4320:
-            days = int(minutes / 1440)
-            return (f"há {days}d no radar", "")
-        days = int(minutes / 1440)
-        return (f"há {days}d no radar", "⚠️")
+        if hours < 1:
+            return (f"{label_prefix} agora há pouco", "🔥🔥")
+        if hours < 24:
+            h = int(hours)
+            return (f"{label_prefix} há {h}h", "🔥🔥")
+        if hours < 72:
+            d = int(hours / 24)
+            return (f"{label_prefix} há {d}d", "🔥")
+        if hours < 168:
+            d = int(hours / 24)
+            return (f"{label_prefix} há {d}d", "⚡")
+        d = int(hours / 24)
+        return (f"{label_prefix} há {d}d", "")
     except (ValueError, AttributeError):
-        return ("desconhecido", "❓")
+        return ("data inválida", "❓")
 
 
 def _format_job(row: sqlite3.Row) -> str:
     title = row["title"]
-    company = row["company_name"]
     location = row["location"] or "—"
     score = row["score"]
     url = row["url"]
-    remote = "🌎 Remote" if row["remote_flag"] else "📍 Onsite/Hybrid"
     keywords = (row["matched_keywords"] or "").replace('"', "")
 
-    radar_label, radar_marker = _time_on_radar(row["first_seen_at"])
+    # Empresa REAL: prioriza ats_handle (que agora é o company_name real da Adzuna)
+    # Fallback pra company_name da tabela companies
+    empresa = row["company_name"]
+    try:
+        ats_handle = row["ats_handle"]
+        # Se ats_handle parece nome de empresa (não é query_id nem handle técnico)
+        if ats_handle and " " in ats_handle and len(ats_handle) > 5:
+            empresa = ats_handle
+    except (IndexError, KeyError):
+        pass
+
+    posted_label, freshness = _time_since_posted(
+        row["posted_at"], row["first_seen_at"]
+    )
 
     tier = row["tier"] or ""
     tier_label = {"T1": "🟢 T1", "T2": "🔵 T2", "T3": "⚪ T3"}.get(tier, "")
 
-    visa = ""
-    try:
-        if row["visa_sponsorship"]:
-            visa = " | 🛂 Visa Sponsor"
-    except (IndexError, KeyError):
-        pass
-
-    domain_badge = _domain_badge(url)
-    domain_line = f"\n🎯 {domain_badge}" if domain_badge else ""
-
-    recruiter = ""
-    if row["recruiter_name"]:
-        recruiter = f"\n👤 {row['recruiter_name']}"
-        if row["recruiter_email"]:
-            recruiter += f" — {row['recruiter_email']}"
-
     return (
-        f"{radar_marker} <b>{_escape(title)}</b>\n"
-        f"🏢 {_escape(company)} | {remote} | {tier_label}{visa}\n"
+        f"{freshness} <b>{_escape(title)}</b>\n"
+        f"🏢 {_escape(empresa)} | 🌎 Remote | {tier_label}\n"
         f"📌 {_escape(location)}\n"
-        f"📡 <b>{radar_label}</b>"
-        f"{domain_line}\n"
-        f"⭐ Score: <b>{score}</b> | 🔖 {_escape(keywords[:120])}"
-        f"{recruiter}\n"
+        f"📅 <b>{posted_label}</b>\n"
+        f"⭐ Score: <b>{score}</b> | 🔖 {_escape(keywords[:120])}\n"
         f"🔗 {url}"
     )
 
@@ -162,18 +133,25 @@ def notify_jobs(rows: Iterable[sqlite3.Row]) -> list[str]:
     if not rows:
         return []
 
-    # Ordenar por SCORE DESC primeiro (não por tempo)
-    rows.sort(key=lambda r: (-r["score"], r["first_seen_at"] or ""))
+    # Ordenar por FRESCOR (posted_at recente primeiro) e depois score
+    def sort_key(r):
+        try:
+            posted = r["posted_at"] or r["first_seen_at"] or ""
+        except (IndexError, KeyError):
+            posted = ""
+        return (posted, r["score"])
+
+    rows.sort(key=sort_key, reverse=True)
 
     notified_ids: list[str] = []
     for i in range(0, len(rows), BATCH_SIZE):
         batch = rows[i : i + BATCH_SIZE]
-        fresh_1h = sum(1 for r in batch if _minutes_on_radar(r["first_seen_at"]) < 60)
-        fresh_24h = sum(1 for r in batch if _minutes_on_radar(r["first_seen_at"]) < 1440)
+        fresh_24h = sum(1 for r in batch if _hours_since_posted(r) < 24)
+        fresh_72h = sum(1 for r in batch if _hours_since_posted(r) < 72)
 
         header = (
-            f"🎯 <b>{len(batch)} vagas novas no radar</b>\n"
-            f"({fresh_1h} 🔥🔥 &lt; 1h | {fresh_24h} ⚡ &lt; 24h)\n\n"
+            f"🎯 <b>{len(batch)} vagas remote</b>\n"
+            f"({fresh_24h} 🔥🔥 postadas &lt; 24h | {fresh_72h} 🔥 &lt; 3d)\n\n"
         )
         body = "\n\n━━━━━━━━━━━━━━\n\n".join(_format_job(r) for r in batch)
         message = header + body
@@ -186,13 +164,17 @@ def notify_jobs(rows: Iterable[sqlite3.Row]) -> list[str]:
     return notified_ids
 
 
-def _minutes_on_radar(first_seen_iso: str | None) -> float:
-    if not first_seen_iso:
-        return 0
+def _hours_since_posted(row: sqlite3.Row) -> float:
     try:
-        first_seen = datetime.fromisoformat(first_seen_iso.replace("Z", "+00:00"))
-        if first_seen.tzinfo is None:
-            first_seen = first_seen.replace(tzinfo=timezone.utc)
-        return (datetime.now(timezone.utc) - first_seen).total_seconds() / 60
+        iso = row["posted_at"] or row["first_seen_at"]
+    except (IndexError, KeyError):
+        return 99999
+    if not iso:
+        return 99999
+    try:
+        dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return (datetime.now(timezone.utc) - dt).total_seconds() / 3600
     except (ValueError, AttributeError):
         return 99999

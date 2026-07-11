@@ -1,24 +1,21 @@
 """
-Adzuna Adapter v9 — Enriched
-=============================
-Melhorias:
-1. Segue redirect_url e captura URL FINAL (empresa real, não Adzuna)
-2. Extrai descrição COMPLETA da página via JSON-LD JobPosting schema
-3. Identifica domínios de ATS confiáveis (JazzHR, Greenhouse, Lever, etc.)
-4. Retorna URL final direto no Telegram (você aplica DIRETO no ATS da empresa)
+Adzuna Adapter v10 — remote-only, no enrich theater
+====================================================
+Mudanças:
+- DESCARTA vagas non-remote na origem (não vai nem pro banco)
+- Retorna company_name real da vaga (Data Meaning, não "Adzuna Global")
+- Removido enrich que não funciona (Adzuna bloqueia bot)
+- posted_at real da fonte (Adzuna reporta data original da vaga)
 """
 
 from __future__ import annotations
 
-import json
 import logging
 import os
 import time
 from datetime import datetime, timezone
-from urllib.parse import urlparse
 
 import requests
-from bs4 import BeautifulSoup
 
 from adapters import JobPosting, _strip_html
 
@@ -26,33 +23,9 @@ logger = logging.getLogger(__name__)
 
 BASE_URL = "https://api.adzuna.com/v1/api/jobs"
 POLITE_DELAY = 1.5
-ENRICH_DELAY = 1.0        # delay entre requests de enrich
-TIMEOUT = 15
+TIMEOUT = 30
 MAX_DAYS_OLD = 3
 RESULTS_PER_PAGE = 50
-ENRICH_MAX_JOBS = 30      # limita enrich pra não estourar timeout
-
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-        "AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"
-    ),
-    "Accept": "text/html,application/xhtml+xml",
-    "Accept-Language": "en-US,en;q=0.9,pt;q=0.8",
-}
-
-# ATS/portais confiáveis — significa que o link vai direto pra empresa real
-CONFIDENT_DOMAINS = {
-    "jazzhr.com", "applytojob.com", "boards.greenhouse.io", "greenhouse.io",
-    "jobs.lever.co", "lever.co", "kenoby.com", "gupy.io",
-    "jobs.ashbyhq.com", "ashbyhq.com", "linkedin.com", "workable.com",
-    "smartrecruiters.com", "workday.com", "wd1.myworkdayjobs.com",
-    "myworkdayjobs.com", "solides.jobs", "solides.com",
-    "personio.com", "personio.de", "jobvite.com", "icims.com",
-    "bamboohr.com", "recruitee.com", "teamtailor.com", "breezy.hr",
-    "polymer.co", "notion.site", "ycombinator.com", "vagas.com.br",
-    "catho.com.br", "infojobs.com.br", "trampos.co", "trabalhabrasil.com.br"
-}
 
 
 QUERIES = [
@@ -64,6 +37,22 @@ QUERIES = [
     {"id": "us-analytics-latam", "country": "us", "what": "analytics engineer latin america"},
     {"id": "ca-de-remote-latam", "country": "ca", "what": "data engineer remote latin america"},
 ]
+
+# Sinais explícitos de remote (precisa 1 desses aparecer)
+REMOTE_SIGNALS = (
+    "remote", "anywhere", "work from home", "home office", "home-office",
+    "trabalho remoto", "100% remoto", "teletrabajo",
+    "latam", "latin america", "distribuído", "remoto",
+    "fully remote", "distributed team", "wfh",
+)
+
+# Sinais explícitos de PRESENCIAL/HÍBRIDO (se aparecer, descarta)
+ONSITE_SIGNALS = (
+    "hybrid", "híbrido", "hibrido",
+    "on-site", "onsite", "on site",
+    "presencial", "in-office", "in office",
+    "must relocate", "relocation required",
+)
 
 
 def _fetch_page(country: str, page: int, params: dict) -> dict | None:
@@ -85,7 +74,7 @@ def _fetch_page(country: str, page: int, params: dict) -> dict | None:
     }
 
     try:
-        response = requests.get(url, params=query_params, timeout=30)
+        response = requests.get(url, params=query_params, timeout=TIMEOUT)
         if response.status_code == 429:
             time.sleep(30)
             return None
@@ -99,117 +88,44 @@ def _fetch_page(country: str, page: int, params: dict) -> dict | None:
         return None
 
 
-def _extract_from_jsonld(soup: BeautifulSoup) -> str | None:
-    """Procura schema.org JobPosting no HTML — mais confiável."""
-    for script in soup.find_all("script", type="application/ld+json"):
-        try:
-            raw = script.string or script.get_text()
-            if not raw:
-                continue
-            data = json.loads(raw)
-            # Pode vir como lista
-            items = data if isinstance(data, list) else [data]
-            for item in items:
-                if isinstance(item, dict) and (
-                    item.get("@type") == "JobPosting" or
-                    "JobPosting" in str(item.get("@type", ""))
-                ):
-                    desc = item.get("description", "")
-                    if desc:
-                        return _strip_html(desc)
-        except (json.JSONDecodeError, TypeError, AttributeError):
-            continue
-    return None
-
-
-def _extract_description(html: str) -> str:
-    """Multi-fallback pra extrair descrição da vaga."""
-    try:
-        soup = BeautifulSoup(html, "html.parser")
-    except Exception:
-        return ""
-
-    # 1) JSON-LD schema.org JobPosting (padrão google jobs)
-    desc = _extract_from_jsonld(soup)
-    if desc and len(desc) > 200:
-        return desc[:6000]
-
-    # 2) Meta og:description
-    og = soup.find("meta", {"property": "og:description"})
-    if og:
-        content = og.get("content", "")
-        if content and len(content) > 100:
-            return content[:6000]
-
-    # 3) Common containers de descrição
-    for selector in [
-        {"name": "div", "class_": "job-description"},
-        {"name": "div", "class_": "description"},
-        {"name": "div", "id": "job-details"},
-        {"name": "section", "class_": "job-post"},
-        {"name": "article"},
-        {"name": "main"},
-    ]:
-        el = soup.find(**selector)
-        if el:
-            text = _strip_html(el.get_text(" ", strip=True))
-            if len(text) > 300:
-                return text[:6000]
-
-    # 4) Fallback: body
-    body = soup.find("body")
-    if body:
-        return _strip_html(body.get_text(" ", strip=True))[:6000]
-
-    return ""
-
-
-def _follow_redirect(url: str) -> tuple[str, str, str]:
+def _is_confidently_remote(title: str, description: str, location: str) -> bool:
     """
-    Segue o redirect e retorna (final_url, final_domain, description).
+    True SÓ se houver sinal explícito de remote E não houver conflito com hybrid/onsite.
     """
-    try:
-        response = requests.get(url, headers=HEADERS, timeout=TIMEOUT,
-                                allow_redirects=True)
-        if response.status_code >= 400:
-            return url, "", ""
-        final_url = str(response.url)
-        final_domain = urlparse(final_url).netloc.lower().lstrip("www.")
-        description = _extract_description(response.text)
-        return final_url, final_domain, description
-    except requests.RequestException as exc:
-        logger.warning("redirect follow failed [%s]: %s", url[:80], exc)
-        return url, "", ""
+    haystack = (title + " " + description + " " + location).lower()
 
+    # Se menciona hybrid/onsite explicitamente, descarta mesmo se falar "remote" também
+    for onsite in ONSITE_SIGNALS:
+        if onsite in haystack:
+            # Exceção: "remote or hybrid" — se remote aparece perto, ainda aceita
+            # Mas normalmente hybrid = presencial parcial = fora
+            return False
 
-def _domain_confidence(domain: str) -> str:
-    """Retorna badge de confiança do domínio."""
-    d = domain.lower().lstrip("www.")
-    for known in CONFIDENT_DOMAINS:
-        if known in d:
-            return "✓"
-    return "?"
+    # Precisa ter sinal claro de remote
+    for signal in REMOTE_SIGNALS:
+        if signal in haystack:
+            return True
+
+    return False
 
 
 def _parse_job(item: dict, query_id: str) -> JobPosting | None:
+    title = item.get("title", "").strip()
+    if not title:
+        return None
+
     location_obj = item.get("location", {}) or {}
     location_area = location_obj.get("area", []) or []
     location = (", ".join(location_area[-2:]) if location_area
                 else location_obj.get("display_name", ""))
 
     description = _strip_html(item.get("description", ""))
-    title = item.get("title", "").strip()
-    if not title:
+
+    # ⚠️ GATE REMOTE: descarta se não for confidently remote
+    if not _is_confidently_remote(title, description, location):
         return None
 
-    haystack = (title + " " + description[:500] + " " + location).lower()
-    remote_flag = any(
-        k in haystack for k in ("remote", "anywhere", "work from home",
-                                "home office", "trabalho remoto", "teletrabajo",
-                                "100% remoto", "remoto", "latam")
-    )
-
-    company_name = (item.get("company") or {}).get("display_name", "Unknown")
+    company_name = (item.get("company") or {}).get("display_name", "Empresa")
 
     created = item.get("created")
     posted_at = None
@@ -221,34 +137,24 @@ def _parse_job(item: dict, query_id: str) -> JobPosting | None:
 
     return JobPosting(
         ats="adzuna",
-        company_handle=query_id,
+        company_handle=company_name[:50],   # nome real da empresa vai como handle
         external_id=str(item.get("id", "")),
         title=title,
         location=location,
-        remote_flag=remote_flag,
+        remote_flag=True,  # já garantimos que é remote
         description=description[:2000],
         url=item.get("redirect_url", ""),
         posted_at=posted_at,
         department=(item.get("category") or {}).get("label"),
-        raw={"_company_label": company_name},
+        raw={"_company_label": company_name, "_query_id": query_id},
     )
-
-
-def _looks_like_data_role(title: str) -> bool:
-    """Filtro leve pra decidir se vale a pena enriquecer."""
-    t = title.lower()
-    return any(k in t for k in (
-        "data engineer", "data platform", "analytics engineer", "bi engineer",
-        "engenheiro de dados", "engenheiro dados", "ingeniero de datos",
-        "data ops", "dataops", "data developer", "big data", "lakehouse",
-    ))
 
 
 def fetch_adzuna(handle: str = "all") -> list[JobPosting]:
     seen_ids: set[str] = set()
     out: list[JobPosting] = []
+    discarded_non_remote = 0
 
-    # Fase 1: pegar todos jobs base da API
     for query in QUERIES:
         country = query["country"]
         query_id = query["id"]
@@ -262,7 +168,8 @@ def fetch_adzuna(handle: str = "all") -> list[JobPosting]:
             logger.info("Adzuna [%s]: 0 jobs", query_id)
             continue
 
-        new_this_page = 0
+        kept = 0
+        discarded = 0
         for item in results:
             item_id = str(item.get("id", ""))
             if not item_id or item_id in seen_ids:
@@ -271,36 +178,17 @@ def fetch_adzuna(handle: str = "all") -> list[JobPosting]:
             job = _parse_job(item, query_id)
             if job:
                 out.append(job)
-                new_this_page += 1
+                kept += 1
+            else:
+                discarded += 1
 
-        logger.info("Adzuna [%s]: %d jobs (%d após dedup)",
-                    query_id, len(results), new_this_page)
+        discarded_non_remote += discarded
+        logger.info("Adzuna [%s]: kept=%d, discarded=%d (non-remote)",
+                    query_id, kept, discarded)
         time.sleep(POLITE_DELAY)
 
-    logger.info("Adzuna phase 1: %d unique jobs", len(out))
-
-    # Fase 2: enriquecer os que parecem DE (segue redirect, pega descrição real)
-    to_enrich = [j for j in out if _looks_like_data_role(j.title)]
-    to_enrich = to_enrich[:ENRICH_MAX_JOBS]  # limita pra não estourar
-    logger.info("Adzuna phase 2: enriching %d/%d jobs", len(to_enrich), len(out))
-
-    for i, job in enumerate(to_enrich):
-        final_url, final_domain, rich_desc = _follow_redirect(job.url)
-
-        if rich_desc and len(rich_desc) > len(job.description):
-            job.description = rich_desc
-        if final_url and final_url != job.url:
-            job.url = final_url
-        if final_domain:
-            job.raw["_final_domain"] = final_domain
-            job.raw["_domain_confidence"] = _domain_confidence(final_domain)
-
-        if (i + 1) % 5 == 0:
-            logger.info("Adzuna enrich: %d/%d done", i + 1, len(to_enrich))
-        time.sleep(ENRICH_DELAY)
-
-    logger.info("Adzuna DONE: %d jobs (max_days_old=%d, %d enriched)",
-                len(out), MAX_DAYS_OLD, len(to_enrich))
+    logger.info("Adzuna TOTAL: %d remote jobs (%d discarded non-remote)",
+                len(out), discarded_non_remote)
     return out
 
 
