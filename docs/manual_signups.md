@@ -7,15 +7,15 @@ Pipeline não consegue scrapear; você precisa aplicar manualmente.
 
 | Network | Tier | Status | URL | Notes |
 | --- | --- | --- | --- | --- |
-| A.Team | A | ⏳ manual | [apply](https://www.a.team/join) |  |
-| Andela | A | ⏳ manual | [apply](https://andela.com/talent) |  |
-| Arc.dev | A | ⏳ manual | [apply](https://arc.dev/remote-jobs) |  |
-| Athyna | A | ⏳ manual | [apply](https://www.athyna.com/talent) | LATAM + USD. Signup + screening. |
-| Braintrust | A | ⏳ manual | [apply](https://www.usebraintrust.com/join) |  |
+| A.Team | A | ⏳ manual | [apply](https://www.a.team/join) | Senior/staff focus. |
+| Andela | A | ⏳ manual | [apply](https://andela.com/talent) | Global network. |
+| Arc.dev | A | ⏳ manual | [apply](https://arc.dev/remote-jobs) | Remote-first. Job board próprio. |
+| Athyna | A | ⏳ manual | [apply](https://www.athyna.com/talent) | LATAM + USD. Signup + screening obrigatório. |
+| Braintrust | A | ⏳ manual | [apply](https://www.usebraintrust.com/join) | Marketplace token-based. |
 | Gun.io | A | ⏳ manual | [apply](https://gun.io/developers) |  |
 | Terminal | A | ⏳ manual | [apply](https://www.terminal.io/engineers) |  |
-| Toptal | A | ⏳ manual | [apply](https://www.toptal.com/talent/apply) | Top 3% screening. Multi-step interview. |
-| X-Team | A | ⏳ manual | [apply](https://x-team.com/developers) |  |
+| Toptal | A | ⏳ manual | [apply](https://www.toptal.com/talent/apply) | Top 3%. Multi-step interview. |
+| X-Team | A | ⏳ manual | [apply](https://x-team.com/developers) | Long-term contracts. Alto DE demand. |
 | CloudDevs | B | ⏳ manual | [apply](https://clouddevs.com/join-as-developer) |  |
 | Lemon.io | B | ⏳ manual | [apply](https://lemon.io/developers) |  |
 | Proxify | B | ⏳ manual | [apply](https://proxify.io/developers) |  |
