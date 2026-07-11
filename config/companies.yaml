@@ -1,132 +1,28 @@
 # ═══════════════════════════════════════════════════════════════════════
-# COMPANIES v7 — enxuto pós-decisão A
+# COMPANIES v8 — FOCO 100% LATAM REMOTE USD
 # ═══════════════════════════════════════════════════════════════════════
-# Estratégia:
-# - Adzuna PRIMÁRIA (vagas < 3 dias, filtro real na fonte)
-# - Greenhouse EU BACKUP (HelloFresh/N26/Stripe/Celonis Fase 2 visa sponsor)
-# - Manual networks (lembrete Tier A — Toptal/Athyna/Andela)
-#
-# Removidas: Truelogic (evergreen), Remotive/RemoteOK/Himalayas/WWR
-# (aggregators com vagas velhas), consultorias HTML sem retorno bom.
+# Removidas TODAS as empresas EU sponsor (não é mercado real sem cidadania).
+# Focado só em Fase 1: contratos USD remote LATAM.
 # ═══════════════════════════════════════════════════════════════════════
 
 companies:
 
   # ┌─────────────────────────────────────────────────────────────────┐
-  # │ ADZUNA — fonte primária (vagas frescas garantidas)              │
+  # │ ADZUNA — fonte primária LATAM/US/CA remote (vagas frescas)      │
   # └─────────────────────────────────────────────────────────────────┘
 
-  - name: Adzuna Global
+  - name: Adzuna LATAM
     url: https://www.adzuna.com/
     strategy: job_board_aggregator
     tier_priority: A
     phase: 1
     ats: adzuna
     handle: all
-    notes: "Filtro max_days_old=3. Cobre BR, ES, DE, NL, GB, US."
+    notes: "BR + US LATAM + CA LATAM. max_days_old=3."
 
   # ┌─────────────────────────────────────────────────────────────────┐
-  # │ EU SPONSOR (Fase 2) — handles Greenhouse verificados            │
-  # └─────────────────────────────────────────────────────────────────┘
-
-  - name: HelloFresh
-    url: https://careers.hellofresh.com/
-    strategy: eu_sponsor
-    tier_priority: A
-    phase: 2
-    ats: greenhouse
-    handle: hellofresh
-
-  - name: N26
-    url: https://n26.com/en-eu/careers
-    strategy: eu_sponsor
-    tier_priority: A
-    phase: 2
-    ats: greenhouse
-    handle: n26
-
-  - name: Trade Republic
-    url: https://traderepublic.com/careers
-    strategy: eu_sponsor
-    tier_priority: A
-    phase: 2
-    ats: greenhouse
-    handle: traderepublic
-
-  - name: Delivery Hero
-    url: https://careers.deliveryhero.com/
-    strategy: eu_sponsor
-    tier_priority: A
-    phase: 2
-    ats: smartrecruiters
-    handle: DeliveryHero
-
-  - name: Stripe
-    url: https://stripe.com/jobs
-    strategy: eu_sponsor
-    tier_priority: A
-    phase: 2
-    ats: greenhouse
-    handle: stripe
-
-  - name: Contentful
-    url: https://www.contentful.com/careers/
-    strategy: eu_sponsor
-    tier_priority: B
-    phase: 2
-    ats: greenhouse
-    handle: contentful
-
-  - name: Typeform
-    url: https://www.typeform.com/careers/
-    strategy: eu_sponsor
-    tier_priority: A
-    phase: 2
-    ats: greenhouse
-    handle: typeform
-
-  - name: Cabify
-    url: https://cabify.com/en/careers
-    strategy: eu_sponsor
-    tier_priority: A
-    phase: 2
-    ats: greenhouse
-    handle: cabify
-
-  - name: GetYourGuide
-    url: https://careers.getyourguide.com/
-    strategy: eu_sponsor
-    tier_priority: B
-    phase: 2
-    ats: greenhouse
-    handle: getyourguide
-
-  - name: Celonis
-    url: https://www.celonis.com/careers/
-    strategy: eu_sponsor
-    tier_priority: A
-    phase: 2
-    ats: greenhouse
-    handle: celonis
-
-  - name: Intercom
-    url: https://www.intercom.com/careers
-    strategy: eu_sponsor
-    tier_priority: B
-    phase: 2
-    ats: greenhouse
-    handle: intercom
-
-  - name: Flix
-    url: https://flix.careers/
-    strategy: eu_sponsor
-    tier_priority: B
-    phase: 2
-    ats: smartrecruiters
-    handle: FlixBus
-
-  # ┌─────────────────────────────────────────────────────────────────┐
-  # │ MANUAL NETWORKS — apenas geram lembrete no manual_signups.md    │
+  # │ MANUAL NETWORKS — Tier A USD (signup + screening)               │
+  # │ Estratégia: signar em todos, entrar no pool                     │
   # └─────────────────────────────────────────────────────────────────┘
 
   - name: Athyna
@@ -134,44 +30,52 @@ companies:
     strategy: manual_network
     tier_priority: A
     phase: 1
-    notes: "LATAM + USD. Signup + screening."
+    notes: "LATAM + USD. Signup + screening obrigatório."
 
   - name: Toptal
     url: https://www.toptal.com/talent/apply
     strategy: manual_network
     tier_priority: A
     phase: 1
+    notes: "Top 3%. Multi-step interview."
 
   - name: Andela
     url: https://andela.com/talent
     strategy: manual_network
     tier_priority: A
     phase: 1
+    notes: "Global network."
 
   - name: Braintrust
     url: https://www.usebraintrust.com/join
     strategy: manual_network
     tier_priority: A
     phase: 1
+    notes: "Marketplace token-based."
 
   - name: X-Team
     url: https://x-team.com/developers
     strategy: manual_network
     tier_priority: A
     phase: 1
+    notes: "Long-term contracts. Alto DE demand."
 
   - name: A.Team
     url: https://www.a.team/join
     strategy: manual_network
     tier_priority: A
     phase: 1
+    notes: "Senior/staff focus."
 
   - name: Arc.dev
     url: https://arc.dev/remote-jobs
     strategy: manual_network
     tier_priority: A
     phase: 1
+    notes: "Remote-first. Job board próprio."
 
 # ═══════════════════════════════════════════════════════════════════════
-# TOTAL: 19 empresas (1 Adzuna + 12 EU Sponsor + 7 Manual Networks)
+# TOTAL: 8 empresas (1 Adzuna LATAM + 7 Manual Networks USD)
+# Removidas: EU sponsor (HelloFresh, N26, Stripe, Celonis, Contentful,
+# Typeform, Cabify, GetYourGuide, Intercom, Flix, TradeRepublic, Delivery Hero)
 # ═══════════════════════════════════════════════════════════════════════

@@ -1,15 +1,12 @@
 """
-Adzuna Adapter — vagas realmente frescas
-==========================================
-Base do Adzuna se auto-limpa: vagas > 14d saem automaticamente.
-Filtro max_days_old=1 retorna literalmente últimas 24h.
+Adzuna Adapter — LATAM Remote USD ONLY
+========================================
+Removidas queries EU. Focado 100% Fase 1 (USD remote).
 
-Doc: https://developer.adzuna.com/docs/search
-Free tier: 250 calls/dia (mais que suficiente pra 4 runs × 6 queries = 24 calls/dia)
-
-Env vars:
-- ADZUNA_APP_ID
-- ADZUNA_APP_KEY
+Cobertura:
+- BR: data engineer / analytics engineer / senior data engineer
+- US: data engineer "remote latin america" / "latam"
+- CA: data engineer remote latam
 """
 
 from __future__ import annotations
@@ -18,7 +15,6 @@ import logging
 import os
 import time
 from datetime import datetime, timezone
-from typing import Any
 
 import requests
 
@@ -29,50 +25,43 @@ logger = logging.getLogger(__name__)
 BASE_URL = "https://api.adzuna.com/v1/api/jobs"
 POLITE_DELAY = 1.5
 TIMEOUT = 30
-MAX_DAYS_OLD = 3        # últimas 72h — margem de segurança
+MAX_DAYS_OLD = 3
 RESULTS_PER_PAGE = 50
 
 
-# Queries pré-configuradas pro perfil Data Engineer Sr LATAM/USD + EU
 QUERIES = [
     # ─── BR remote (contract PJ USD) ───
     {"id": "br-data-engineer",
      "country": "br",
      "what": "data engineer",
-     "where": "",
      "results_per_page": RESULTS_PER_PAGE},
     {"id": "br-analytics-engineer",
      "country": "br",
      "what": "analytics engineer",
-     "where": "",
+     "results_per_page": RESULTS_PER_PAGE},
+    {"id": "br-senior-data-engineer",
+     "country": "br",
+     "what": "senior data engineer",
      "results_per_page": RESULTS_PER_PAGE},
 
-    # ─── ES (Espanha — plano Granada) ───
-    {"id": "es-data-engineer",
-     "country": "es",
-     "what": "data engineer",
-     "where": "",
+    # ─── US contratando remote LATAM ───
+    {"id": "us-de-remote-latam",
+     "country": "us",
+     "what": "data engineer remote latin america",
+     "results_per_page": RESULTS_PER_PAGE},
+    {"id": "us-de-latam",
+     "country": "us",
+     "what": "data engineer latam",
+     "results_per_page": RESULTS_PER_PAGE},
+    {"id": "us-analytics-latam",
+     "country": "us",
+     "what": "analytics engineer latin america",
      "results_per_page": RESULTS_PER_PAGE},
 
-    # ─── DE (Alemanha — Blue Card) ───
-    {"id": "de-data-engineer",
-     "country": "de",
-     "what": "data engineer",
-     "where": "",
-     "results_per_page": RESULTS_PER_PAGE},
-
-    # ─── NL (Holanda) ───
-    {"id": "nl-data-engineer",
-     "country": "nl",
-     "what": "data engineer",
-     "where": "",
-     "results_per_page": RESULTS_PER_PAGE},
-
-    # ─── UK (Reino Unido) ───
-    {"id": "gb-data-engineer",
-     "country": "gb",
-     "what": "data engineer",
-     "where": "",
+    # ─── CA contratando remote LATAM ───
+    {"id": "ca-de-remote-latam",
+     "country": "ca",
+     "what": "data engineer remote latin america",
      "results_per_page": RESULTS_PER_PAGE},
 ]
 
@@ -90,7 +79,6 @@ def _fetch_page(country: str, page: int, params: dict) -> dict | None:
         "app_key": app_key,
         "results_per_page": params.get("results_per_page", 50),
         "what": params.get("what", ""),
-        "where": params.get("where", ""),
         "max_days_old": MAX_DAYS_OLD,
         "sort_by": "date",
         "content-type": "application/json",
@@ -123,15 +111,15 @@ def _parse_job(item: dict, query_id: str) -> JobPosting | None:
     if not title:
         return None
 
-    haystack = (title + " " + description[:300] + " " + location).lower()
+    haystack = (title + " " + description[:500] + " " + location).lower()
     remote_flag = any(
         k in haystack for k in ("remote", "anywhere", "work from home",
-                                "home office", "trabalho remoto", "teletrabajo")
+                                "home office", "trabalho remoto", "teletrabajo",
+                                "100% remoto", "remoto", "remoto brasil")
     )
 
     company_name = (item.get("company") or {}).get("display_name", "Unknown")
 
-    # Adzuna reporta 'created' que é a data REAL da vaga na fonte original
     created = item.get("created")
     posted_at = None
     if created:
@@ -156,10 +144,6 @@ def _parse_job(item: dict, query_id: str) -> JobPosting | None:
 
 
 def fetch_adzuna(handle: str = "all") -> list[JobPosting]:
-    """
-    handle é ignorado. Roda todas as queries do QUERIES.
-    Deduplica por external_id.
-    """
     seen_ids: set[str] = set()
     out: list[JobPosting] = []
 
@@ -167,7 +151,6 @@ def fetch_adzuna(handle: str = "all") -> list[JobPosting]:
         country = query["country"]
         query_id = query["id"]
 
-        # Só 1 página por query (50 vagas = suficiente com max_days_old=3)
         data = _fetch_page(country, 1, query)
         if not data:
             continue
@@ -197,7 +180,6 @@ def fetch_adzuna(handle: str = "all") -> list[JobPosting]:
     return out
 
 
-# Registry
 ADZUNA_ADAPTERS = {
     "adzuna": fetch_adzuna,
 }
