@@ -10,7 +10,7 @@ Pipeline não consegue scrapear; você precisa aplicar manualmente.
 | A.Team | A | ⏳ manual | [apply](https://www.a.team/join) |  |
 | Andela | A | ⏳ manual | [apply](https://andela.com/talent) |  |
 | Arc.dev | A | ⏳ manual | [apply](https://arc.dev/remote-jobs) |  |
-| Athyna | A | ⏳ manual | [apply](https://www.athyna.com/talent) | LATAM + USD. Apply via talent pool. Screening required. |
+| Athyna | A | ⏳ manual | [apply](https://www.athyna.com/talent) | LATAM + USD. Signup + screening. |
 | Braintrust | A | ⏳ manual | [apply](https://www.usebraintrust.com/join) |  |
 | Gun.io | A | ⏳ manual | [apply](https://gun.io/developers) |  |
 | Terminal | A | ⏳ manual | [apply](https://www.terminal.io/engineers) |  |
