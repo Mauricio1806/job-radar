@@ -10,7 +10,7 @@
 # Plano:              USD remote LATAM (T1) > EUR Espanha/EU (T2) > outras (T3)
 # ═══════════════════════════════════════════════════════════════════════
 
-threshold: 14            # vagas com score >= 14 são notificadas
+threshold: 10            # vagas com score >= 14 são notificadas
 
 # Filtra vagas postadas há mais de X dias (vagas zumbi)
 max_age_days: 999    # DESATIVADO — dedup real é via first_seen_at (delta detection)

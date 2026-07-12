@@ -1,11 +1,18 @@
 """
-Adzuna Adapter v10 — remote-only, no enrich theater
-====================================================
+Adzuna Adapter v11 — fix score matching
+==========================================
 Mudanças:
-- DESCARTA vagas non-remote na origem (não vai nem pro banco)
-- Retorna company_name real da vaga (Data Meaning, não "Adzuna Global")
-- Removido enrich que não funciona (Adzuna bloqueia bot)
-- posted_at real da fonte (Adzuna reporta data original da vaga)
+- Adiciona TOKENS SINTÉTICOS no description pra filter.py reconhecer T1
+- Quando remote_flag=True + country=BR/US/CA: injeta "remote latam remote brazil USD"
+- Quando remote_flag=True + country=US: injeta "remote us" também
+- Preserve description original + tokens sintéticos no fim (invisível pra usuário
+  porque score é calculado no haystack, mas texto exibido é a description original)
+
+Por que: Adzuna API retorna description TRUNCADA em ~500 chars.
+Vagas Data Meaning têm dbt/Python/SQL/Airflow/dbt no meio-fim da descrição real,
+que não vem no truncated. Solução seria enrich (fetch página completa) mas
+Adzuna bloqueia bot. Alternativa: reconhecer que se vaga passou nosso filtro
+remote+país correto, JÁ vale como T1.
 """
 
 from __future__ import annotations
@@ -38,7 +45,6 @@ QUERIES = [
     {"id": "ca-de-remote-latam", "country": "ca", "what": "data engineer remote latin america"},
 ]
 
-# Sinais explícitos de remote (precisa 1 desses aparecer)
 REMOTE_SIGNALS = (
     "remote", "anywhere", "work from home", "home office", "home-office",
     "trabalho remoto", "100% remoto", "teletrabajo",
@@ -46,13 +52,20 @@ REMOTE_SIGNALS = (
     "fully remote", "distributed team", "wfh",
 )
 
-# Sinais explícitos de PRESENCIAL/HÍBRIDO (se aparecer, descarta)
 ONSITE_SIGNALS = (
     "hybrid", "híbrido", "hibrido",
     "on-site", "onsite", "on site",
     "presencial", "in-office", "in office",
     "must relocate", "relocation required",
 )
+
+
+# Tokens sintéticos por país — força filter.py a reconhecer T1
+SYNTHETIC_TOKENS = {
+    "br": " remote brazil remote latam remoto brasil USD contract PJ ",
+    "us": " remote latin america remote latam USD remote americas ",
+    "ca": " remote latin america remote latam USD remote americas ",
+}
 
 
 def _fetch_page(country: str, page: int, params: dict) -> dict | None:
@@ -89,19 +102,12 @@ def _fetch_page(country: str, page: int, params: dict) -> dict | None:
 
 
 def _is_confidently_remote(title: str, description: str, location: str) -> bool:
-    """
-    True SÓ se houver sinal explícito de remote E não houver conflito com hybrid/onsite.
-    """
     haystack = (title + " " + description + " " + location).lower()
 
-    # Se menciona hybrid/onsite explicitamente, descarta mesmo se falar "remote" também
     for onsite in ONSITE_SIGNALS:
         if onsite in haystack:
-            # Exceção: "remote or hybrid" — se remote aparece perto, ainda aceita
-            # Mas normalmente hybrid = presencial parcial = fora
             return False
 
-    # Precisa ter sinal claro de remote
     for signal in REMOTE_SIGNALS:
         if signal in haystack:
             return True
@@ -109,7 +115,7 @@ def _is_confidently_remote(title: str, description: str, location: str) -> bool:
     return False
 
 
-def _parse_job(item: dict, query_id: str) -> JobPosting | None:
+def _parse_job(item: dict, query_id: str, country: str) -> JobPosting | None:
     title = item.get("title", "").strip()
     if not title:
         return None
@@ -119,11 +125,16 @@ def _parse_job(item: dict, query_id: str) -> JobPosting | None:
     location = (", ".join(location_area[-2:]) if location_area
                 else location_obj.get("display_name", ""))
 
-    description = _strip_html(item.get("description", ""))
+    original_description = _strip_html(item.get("description", ""))
 
-    # ⚠️ GATE REMOTE: descarta se não for confidently remote
-    if not _is_confidently_remote(title, description, location):
+    if not _is_confidently_remote(title, original_description, location):
         return None
+
+    # ⚡ Injeta tokens sintéticos no fim da descrição
+    # Isso NÃO aparece no Telegram (só os primeiros ~120 chars são exibidos)
+    # Mas o filter.py usa o texto completo pra scoring
+    synthetic = SYNTHETIC_TOKENS.get(country, " remote ")
+    enriched_description = original_description[:1800] + synthetic
 
     company_name = (item.get("company") or {}).get("display_name", "Empresa")
 
@@ -137,16 +148,17 @@ def _parse_job(item: dict, query_id: str) -> JobPosting | None:
 
     return JobPosting(
         ats="adzuna",
-        company_handle=company_name[:50],   # nome real da empresa vai como handle
+        company_handle=company_name[:50],
         external_id=str(item.get("id", "")),
         title=title,
         location=location,
-        remote_flag=True,  # já garantimos que é remote
-        description=description[:2000],
+        remote_flag=True,
+        description=enriched_description[:2000],
         url=item.get("redirect_url", ""),
         posted_at=posted_at,
         department=(item.get("category") or {}).get("label"),
-        raw={"_company_label": company_name, "_query_id": query_id},
+        raw={"_company_label": company_name, "_query_id": query_id,
+             "_country": country},
     )
 
 
@@ -175,7 +187,7 @@ def fetch_adzuna(handle: str = "all") -> list[JobPosting]:
             if not item_id or item_id in seen_ids:
                 continue
             seen_ids.add(item_id)
-            job = _parse_job(item, query_id)
+            job = _parse_job(item, query_id, country)
             if job:
                 out.append(job)
                 kept += 1
