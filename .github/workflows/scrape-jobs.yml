@@ -2,7 +2,7 @@ name: scrape-jobs
 
 on:
   schedule:
-    - cron: "0 6,12,18,23 * * *"   # 4x/dia UTC
+    - cron: "0 11,12,15,17,19,20,23 * * *"   # 4x/dia UTC
   workflow_dispatch:
 
 permissions:
