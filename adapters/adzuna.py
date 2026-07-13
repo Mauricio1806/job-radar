@@ -59,6 +59,29 @@ ONSITE_SIGNALS = (
     "must relocate", "relocation required",
 )
 
+# Vagas que parecem LATAM mas são pra contratar americanos pra trabalhar COM LATAM
+# ou requerem vínculo empregatício americano (W2 = só pra quem tem autorização de trabalho EUA)
+US_EMPLOYMENT_SIGNALS = (
+    " w2 ",
+    "w2 contract",
+    "w2 only",
+    "must be authorized to work",
+    "authorized to work in the us",
+    "authorized to work in the united states",
+    "us citizen",
+    "us work authorization",
+    "work authorization required",
+    "must be eligible to work in the us",
+    "eligible to work in the united states",
+    "clearance required",
+    "security clearance",
+    # Empresa contrata gente LATAM mas ela é onsite EUA
+    "onsite in",
+    "on-site in",
+    "office in",
+    "based in our",
+)
+
 
 # Tokens sintéticos por país — força filter.py a reconhecer T1
 SYNTHETIC_TOKENS = {
@@ -104,10 +127,17 @@ def _fetch_page(country: str, page: int, params: dict) -> dict | None:
 def _is_confidently_remote(title: str, description: str, location: str) -> bool:
     haystack = (title + " " + description + " " + location).lower()
 
+    # Bloqueia hybrid/onsite explícito
     for onsite in ONSITE_SIGNALS:
         if onsite in haystack:
             return False
 
+    # Bloqueia W2 e requerimentos de trabalho americano
+    for us_signal in US_EMPLOYMENT_SIGNALS:
+        if us_signal in haystack:
+            return False
+
+    # Precisa ter sinal claro de remote
     for signal in REMOTE_SIGNALS:
         if signal in haystack:
             return True
