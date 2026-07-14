@@ -17,6 +17,33 @@ companies:
     handle: all
     notes: "API pública. Ruzora, Artefact LatAm e staffing USD remote publicam aqui."
 
+  - name: Remotive
+    url: https://remotive.com/remote-jobs
+    strategy: job_board_aggregator
+    tier_priority: A
+    phase: 1
+    ats: remotive
+    handle: data
+    notes: "API JSON gratuita. Vagas DE/Analytics remote globais."
+
+  - name: Himalayas
+    url: https://himalayas.app/jobs
+    strategy: job_board_aggregator
+    tier_priority: A
+    phase: 1
+    ats: himalayas
+    handle: data-engineer
+    notes: "API JSON. Remote-first, startups US."
+
+  - name: We Work Remotely
+    url: https://weworkremotely.com/remote-jobs
+    strategy: job_board_aggregator
+    tier_priority: A
+    phase: 1
+    ats: wwr
+    handle: data
+    notes: "RSS feed. Remote global."
+
   # ┌─────────────────────────────────────────────────────────────────┐
   # │ JOBICY — RSS remote jobs LATAM/Brazil                           │
   # └─────────────────────────────────────────────────────────────────┘
