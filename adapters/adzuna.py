@@ -31,18 +31,38 @@ logger = logging.getLogger(__name__)
 BASE_URL = "https://api.adzuna.com/v1/api/jobs"
 POLITE_DELAY = 1.5
 TIMEOUT = 30
-MAX_DAYS_OLD = 3
+MAX_DAYS_OLD = 4
 RESULTS_PER_PAGE = 50
 
 
 QUERIES = [
-    {"id": "br-data-engineer", "country": "br", "what": "data engineer"},
-    {"id": "br-analytics-engineer", "country": "br", "what": "analytics engineer"},
-    {"id": "br-senior-data-engineer", "country": "br", "what": "senior data engineer"},
-    {"id": "us-de-remote-latam", "country": "us", "what": "data engineer remote latin america"},
-    {"id": "us-de-latam", "country": "us", "what": "data engineer latam"},
-    {"id": "us-analytics-latam", "country": "us", "what": "analytics engineer latin america"},
-    {"id": "ca-de-remote-latam", "country": "ca", "what": "data engineer remote latin america"},
+    # ─── BR (empresas de qualquer lugar contratando no Brasil) ───
+    {"id": "br-data-engineer",          "country": "br", "what": "data engineer"},
+    {"id": "br-senior-data-engineer",   "country": "br", "what": "senior data engineer"},
+    {"id": "br-analytics-engineer",     "country": "br", "what": "analytics engineer"},
+    {"id": "br-engenheiro-dados",       "country": "br", "what": "engenheiro de dados"},
+    {"id": "br-databricks",             "country": "br", "what": "databricks engineer"},
+    {"id": "br-data-platform",          "country": "br", "what": "data platform engineer"},
+    {"id": "br-spark-engineer",         "country": "br", "what": "spark engineer"},
+    {"id": "br-aws-data",               "country": "br", "what": "aws data engineer"},
+    {"id": "br-azure-data",             "country": "br", "what": "azure data engineer"},
+    {"id": "br-dbt-engineer",           "country": "br", "what": "dbt data engineer"},
+
+    # ─── US contratando LATAM remote ───
+    {"id": "us-de-latam",               "country": "us", "what": "data engineer latam"},
+    {"id": "us-de-remote-latam",        "country": "us", "what": "data engineer remote latin america"},
+    {"id": "us-de-remote-brazil",       "country": "us", "what": "data engineer remote brazil"},
+    {"id": "us-analytics-latam",        "country": "us", "what": "analytics engineer latam"},
+    {"id": "us-databricks-latam",       "country": "us", "what": "databricks engineer latam"},
+    {"id": "us-de-contractor",          "country": "us", "what": "data engineer contractor remote"},
+
+    # ─── CA contratando LATAM remote ───
+    {"id": "ca-de-latam",               "country": "ca", "what": "data engineer latam"},
+    {"id": "ca-de-remote-latam",        "country": "ca", "what": "data engineer remote latin america"},
+
+    # ─── UK — empresas globais que contratam LATAM remote ───
+    {"id": "gb-de-remote-latam",        "country": "gb", "what": "data engineer remote latam"},
+    {"id": "gb-de-remote-brazil",       "country": "gb", "what": "data engineer remote brazil"},
 ]
 
 REMOTE_SIGNALS = (
@@ -86,8 +106,9 @@ US_EMPLOYMENT_SIGNALS = (
 # Tokens sintéticos por país — força filter.py a reconhecer T1
 SYNTHETIC_TOKENS = {
     "br": " remote brazil remote latam remoto brasil USD contract PJ ",
-    "us": " remote latin america remote latam USD remote americas ",
-    "ca": " remote latin america remote latam USD remote americas ",
+    "us": " remote latin america remote latam USD remote americas contractor ",
+    "ca": " remote latin america remote latam USD remote americas contractor ",
+    "gb": " remote latin america remote latam USD remote brazil contractor ",
 }
 
 
