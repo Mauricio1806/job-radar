@@ -277,7 +277,7 @@ def fetch_himalayas(handle: str = "data-engineer") -> list[JobPosting]:
 # ──────────────────────────────────────────────────────────────────────
 WWR_FEEDS = [
     "https://weworkremotely.com/categories/remote-back-end-programming-jobs.rss",
-    "https://weworkremotely.com/categories/remote-data-science-ai-statistics-jobs.rss",
+    "https://weworkremotely.com/remote-jobs.rss",
 ]
 
 
@@ -288,9 +288,11 @@ def fetch_wwr(handle: str = "data") -> list[JobPosting]:
         try:
             resp = requests.get(feed_url, headers=HEADERS, timeout=TIMEOUT)
             resp.raise_for_status()
+            if not resp.content.strip():
+                continue
             root = ET.fromstring(resp.content)
         except (requests.RequestException, ET.ParseError) as exc:
-            logger.warning("WWR '%s': %s", feed_url[-30:], exc)
+            logger.warning("WWR '%s': %s", feed_url[-40:], exc)
             continue
         for item in root.iter("item"):
             title_full = (item.findtext("title") or "").strip()
@@ -323,51 +325,50 @@ def fetch_wwr(handle: str = "data") -> list[JobPosting]:
 
 
 # ──────────────────────────────────────────────────────────────────────
-# REMOTE ROCKETSHIP — RSS
+# REMOTE ROCKETSHIP — HTML scraping (RSS tem XML inválido)
 # ──────────────────────────────────────────────────────────────────────
-RRS_FEEDS = [
-    "https://www.remoterocketship.com/jobs/data-engineer.rss",
-    "https://www.remoterocketship.com/jobs/analytics-engineer.rss",
-]
+import re as _re
 
 
 def fetch_remoterocketship(handle: str = "all") -> list[JobPosting]:
+    from bs4 import BeautifulSoup
+    RRS_URLS = [
+        "https://www.remoterocketship.com/country/latin-america/jobs/data-engineer/",
+        "https://www.remoterocketship.com/country/brazil/jobs/data-engineer/",
+        "https://www.remoterocketship.com/jobs/analytics-engineer/",
+    ]
     out: list[JobPosting] = []
     seen: set[str] = set()
-    for feed_url in RRS_FEEDS:
+    for url in RRS_URLS:
         try:
-            resp = requests.get(feed_url, headers=HEADERS, timeout=TIMEOUT)
+            resp = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
             resp.raise_for_status()
-            root = ET.fromstring(resp.content)
-        except (requests.RequestException, ET.ParseError) as exc:
-            logger.warning("RemoteRocketship '%s': %s", feed_url, exc)
+            soup = BeautifulSoup(resp.text, "html.parser")
+        except Exception as exc:
+            logger.warning("RemoteRocketship '%s': %s", url[-40:], exc)
             continue
-        for item in root.iter("item"):
-            title = (item.findtext("title") or "").strip()
-            link = (item.findtext("link") or "").strip()
-            if not title or not link:
-                continue
-            ext_id = link.rstrip("/").split("/")[-1]
-            if ext_id in seen:
+        for link_el in soup.find_all("a", href=_re.compile(r"^/jobs/[^/]+/[^/]+/")):
+            href = link_el.get("href", "")
+            ext_id = href.rstrip("/").split("/")[-1]
+            if not ext_id or ext_id in seen:
                 continue
             seen.add(ext_id)
-            published_at = _parse_pubdate(item.findtext("pubDate"))
-            if _is_too_old(published_at):
+            raw_text = link_el.get_text(" ", strip=True)
+            if " at " in raw_text:
+                parts = raw_text.rsplit(" at ", 1)
+                title, company_name = parts[0].strip(), parts[1].strip()
+            else:
+                title, company_name = raw_text, "Unknown"
+            if not _is_de_title(title):
                 continue
-            description = _strip_html(item.findtext("description") or "")
-            # Company geralmente está no título "Title at Company"
-            company_name = "Unknown"
-            if " at " in title:
-                parts = title.rsplit(" at ", 1)
-                title = parts[0].strip()
-                company_name = parts[1].strip()
             out.append(JobPosting(
                 ats="remoterocketship", company_handle=company_name[:50],
-                external_id=ext_id, title=title, location="Remote",
-                remote_flag=True, description=description[:2000],
-                url=link, posted_at=published_at,
-                raw={"_company_label": company_name},
+                external_id=ext_id, title=title, location="Remote LATAM",
+                remote_flag=True, description="",
+                url=f"https://www.remoterocketship.com{href}",
+                posted_at=None, raw={"_company_label": company_name},
             ))
+        logger.info("RemoteRocketship '%s': %d total so far", url[-40:], len(out))
         time.sleep(POLITE_DELAY)
     logger.info("RemoteRocketship TOTAL: %d jobs", len(out))
     return out
