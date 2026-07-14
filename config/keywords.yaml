@@ -1,461 +1,304 @@
 # ═══════════════════════════════════════════════════════════════════════
-# KEYWORDS — calibrado com base no perfil real do Mauricio
-# ═══════════════════════════════════════════════════════════════════════
-# Fonte: CV 2026 + LinkedIn (Profile_8.pdf)
-# Stack em produção:  Azure (ADF/Databricks/Delta/Synapse) + AWS (Glue/S3/Athena/Redshift/Lambda)
-#                     + Python/PySpark/SQL + dbt + Airflow + Power BI + Git/CI/CD
-# Stack familiaridade: Snowflake, Kafka, K8s, Terraform, GCP, OpenLineage, Great Expectations
-# Domínios fortes:    Oil & Gas, Renewable Energy, Logistics/Mobility, Healthcare, Manufacturing
-# Idiomas:            EN C2, ES B2, PT nativo
-# Plano:              USD remote LATAM (T1) > EUR Espanha/EU (T2) > outras (T3)
+# KEYWORDS v19 — Senior + Strong Mid focus
 # ═══════════════════════════════════════════════════════════════════════
 
-threshold: 10            # vagas com score >= 14 são notificadas
+threshold: 10
 
-# Filtra vagas postadas há mais de X dias (vagas zumbi)
-max_age_days: 999    # DESATIVADO — dedup real é via first_seen_at (delta detection)
-
-# Títulos descartados na hora (vagas evergreen / talent pool / role mismatch)
-blocked_titles:
-  # Evergreen / Talent Pool
-  - open application
-  - open applications
-  - general application
-  - talent pool
-  - talent community
-  - talent network
-  - always hiring
-  - evergreen
-  - future opportunities
-  - express interest
-  - join our team
-  - join our talent
-  - speculative application
-  # Working Student / Internship
-  - working student
-  - werkstudent
-  - student intern
-  - intern,
-  - internship,
-  - trainee,
-  - graduate program
-  - graduate scheme
-  - new grad
-  - apprentice
-  # Roles que NÃO são Data Engineer (mesmo se a descrição menciona "data engineer")
-  - software engineer
-  - software development engineer
-  - full-stack engineer
-  - full stack engineer
-  - fullstack engineer
-  - frontend engineer
-  - front-end engineer
-  - front end engineer
-  - backend engineer
-  - back-end engineer
-  - back end engineer
-  - backend focused
-  - backend-focused
-  - back-end focused
-  - mobile engineer
-  - ios engineer
-  - android engineer
-  - devops engineer
-  - site reliability
-  - sre engineer
-  - security engineer
-  - qa engineer
-  - test engineer
-  - automation engineer
-  - data engineering manager
-  - engineering manager
-  - data analyst
-  - data architect
-  - data steward
-  - bi analyst
-  - ".net"
-  - "java developer"
-  - "angular"
-  - "react developer"
-  - "node.js developer"
-  - "rails developer"
-  - "django developer"
-  - "php developer"
-  - "wordpress"
-  - product manager
-  - product designer
-  - ux designer
-  - ui designer
-  - sales
-  - account executive
-  - account manager
-  - customer success
-  - marketing
+max_age_days: 999   # Controle de data feito na fonte (Adzuna max_days_old, GOB filter)
 
 weights:
-  must_have: 5           # gate keyword (Data Engineer / Analytics Engineer)
-  tier_1_stack: 3        # stack que está no CV em produção
-  tier_2_stack: 1        # stack que aparece como "familiar"
-  domain_bonus: 4        # SAP S/4HANA + outros raros e valorizados
-  industry_boost: 2      # vagas em indústrias com domain expertise
-  region_t1: 5           # USD remote LATAM
-  region_t2: 3           # EUR Espanha/EU remote
-  region_t3: 1           # outras regiões aceitáveis
+  must_have: 5
+  tier_1_stack: 3
+  tier_2_stack: 1
+  domain_bonus: 4
+  industry_boost: 2
+  region_t1: 5
+  region_t2: 3
+  region_t3: 1
   currency_usd: 3
   currency_eur: 2
   seniority_match: 3
-  language_es: 1         # vagas em espanhol pegam bonus extra
-  visa_sponsorship: 5    # bonus pesado pra Fase 2 (Página B — relocação EU)
+  language_es: 1
+  visa_sponsorship: 5
 
-# ─────────────────────────────────────────────────────────────────────
-# VISA SPONSORSHIP — bonus pesado pra Fase 2 (relocação EU)
-# ─────────────────────────────────────────────────────────────────────
+# Gate: precisa ter um desses no TÍTULO
+must_have_any:
+  - data engineer
+  - analytics engineer
+  - engenheiro de dados
+  - ingeniero de datos
+  - data platform engineer
+  - bi engineer
+  - databricks engineer
+  - dbt engineer
+  - data developer
+  - pipeline engineer
+  - big data engineer
+
+# Tier 1 stack — CV em produção
+tier_1_stack:
+  - databricks
+  - pyspark
+  - azure data factory
+  - adf
+  - azure synapse
+  - synapse
+  - adls
+  - azure data lake
+  - aws glue
+  - glue
+  - redshift
+  - amazon redshift
+  - s3
+  - amazon s3
+  - aws lambda
+  - lambda
+  - dbt
+  - airflow
+  - apache airflow
+  - power bi
+  - python
+  - sql
+  - t-sql
+  - delta lake
+  - delta
+  - lakehouse
+
+# Tier 2 stack — conhecimento complementar
+tier_2_stack:
+  - snowflake
+  - kafka
+  - apache kafka
+  - spark
+  - kubernetes
+  - k8s
+  - terraform
+  - bigquery
+  - google cloud
+  - gcp
+  - data factory
+  - unity catalog
+  - iceberg
+  - parquet
+  - dbt cloud
+  - fivetran
+  - airbyte
+  - prefect
+  - dagster
+  - emr
+  - athena
+  - sagemaker
+  - mlops
+  - great expectations
+  - monte carlo
+  - data observability
+
+# Domain bonus
+domain_bonus:
+  - sap s/4hana
+  - sap bw
+  - sap hana
+  - star schema
+  - dimensional modeling
+  - data governance
+  - data mesh
+  - data contract
+  - data observability
+  - data lineage
+
+# Industry boost
+industry_boost:
+  - oil and gas
+  - oil & gas
+  - energy
+  - renewable energy
+  - healthcare
+  - manufacturing
+  - supply chain
+  - logistics
+  - retail
+  - e-commerce
+  - fintech
+  - financial services
+  - banking
+  - hospitality
+  - mobility
+  - consulting
+
+# Região T1 — USD remote LATAM (prioridade máxima)
+region_tier_1:
+  - remote latam
+  - remote latin america
+  - latam remote
+  - latin america remote
+  - remote brazil
+  - brazil remote
+  - brasil remote
+  - remote brasil
+  - anywhere in latam
+  - work from anywhere latam
+  - latam only
+  - latin america only
+  - anywhere in latin america
+  - remote americas
+  - contractor remote
+  - usd remote
+  - remote contract
+
+# Região T2 — EUR EU remote (Fase 2)
+region_tier_2:
+  - remote spain
+  - remote españa
+  - remote europe
+  - remote eu
+  - eu remote
+  - germany
+  - españa
+  - spain
+  - berlin
+  - amsterdam
+  - madrid
+  - barcelona
+  - dublin
+  - netherlands
+
+# Região T3 — outras remote aceitáveis
+region_tier_3:
+  - remote
+  - work from home
+  - wfh
+  - distributed
+  - anywhere
+  - worldwide
+  - fully remote
+  - home office
+  - remoto
+  - teletrabajo
+
+# Currency signals
+currency_usd:
+  - usd
+  - u.s. dollar
+  - dollar
+  - "$"
+  - "per hour"
+  - "per month usd"
+  - contractor
+  - contrato pj
+  - pj remoto
+  - part time usd
+
+currency_eur:
+  - eur
+  - euro
+  - "€"
+
+# Seniority match — Senior e Mid são OK
+seniority_signals:
+  - senior
+  - sênior
+  - sr.
+  - "sr "
+  - mid
+  - mid-level
+  - mid level
+  - middle
+  - pleno
+  - "iii"
+  - "iv"
+  - staff
+  - specialist
+  - especialista
+  - experienced
+
+# Bloqueio de títulos — roles errados OU seniority muito alto/baixo
+blocked_titles:
+  # Evergreen
+  - open application
+  - talent pool
+  - general application
+  - always hiring
+  - evergreen
+
+  # Seniority ALTO demais (Lead/Head só se for em LATAM context já filtrado pela fonte)
+  - "head of data"
+  - "head of engineering"
+  - "vp of data"
+  - "vp of engineering"
+  - "director of data"
+  - "director of engineering"
+  - "chief data"
+  - "cto"
+  - "cdo"
+  - "engineering manager"
+  - "data engineering manager"
+
+  # Junior/Intern explícito
+  - internship
+  - intern,
+  - estágio
+  - estagiário
+  - trainee
+  - junior,
+  - "jr."
+  - "jr "
+  - apprentice
+  - working student
+  - werkstudent
+  - graduate program
+
+  # Roles que não são DE
+  - software engineer
+  - full-stack engineer
+  - fullstack engineer
+  - frontend engineer
+  - front-end engineer
+  - backend engineer
+  - back-end engineer
+  - devops engineer
+  - site reliability
+  - security engineer
+  - qa engineer
+  - mobile engineer
+  - ios engineer
+  - android engineer
+  - data analyst
+  - data scientist
+  - data architect
+  - machine learning engineer
+  - ml engineer
+  - ai engineer
+  - product manager
+  - account executive
+  - sales
+
+# Bloqueio de tokens no texto (descrição/título/location)
+blocked:
+  - "us only"
+  - "must be us citizen"
+  - "us citizens only"
+  - "only us"
+  - "must be located in the us"
+  - "onsite only"
+  - "no remote"
+
+# Language signals (ES = bonus +1)
+language_es_signals:
+  - buscamos
+  - "se busca"
+  - empresa de
+  - salario
+  - contrato indefinido
+  - años de experiencia
+  - teletrabajo
+
+# Visa sponsorship
 visa_sponsorship_signals:
   - visa sponsorship
   - visa sponsor
   - we sponsor
-  - sponsor visa
-  - sponsor work permit
   - blue card
-  - blaue karte
-  - blau karte
   - relocation package
   - relocation support
-  - relocation assistance
-  - relocation bonus
-  - relocation budget
   - work permit
   - eu work permit
-  - eligible for relocation
-  - relocation to germany
-  - relocation to spain
-  - relocation to netherlands
-  - relocation to ireland
-
-# ─────────────────────────────────────────────────────────────────────
-# GATE — pelo menos UM precisa aparecer no título OU descrição
-# ─────────────────────────────────────────────────────────────────────
-must_have_any:
-  # English
-  - data engineer
-  - senior data engineer
-  - sr. data engineer
-  - sr data engineer
-  - staff data engineer
-  - lead data engineer
-  - principal data engineer
-  - analytics engineer
-  - data platform engineer
-  - lakehouse engineer
-  - cloud data engineer
-  - big data engineer
-  - bi engineer
-  - business intelligence engineer
-  # Portuguese
-  - engenheiro de dados
-  - engenheiro de dados sênior
-  - engenheiro de dados pleno
-  - engenheiro de analytics
-  # Spanish
-  - ingeniero de datos
-  - ingeniero de datos sénior
-  - ingeniero de analítica
-
-# ─────────────────────────────────────────────────────────────────────
-# TIER 1 STACK — coisas que ele tem em produção, máximo match
-# ─────────────────────────────────────────────────────────────────────
-tier_1_stack:
-  # Lakehouse / Spark
-  - databricks
-  - pyspark
-  - apache spark
-  - delta lake
-  - lakehouse
-  # Azure ecosystem (production)
-  - azure data factory
-  - "adf"
-  - azure databricks
-  - azure synapse
-  - synapse
-  - "adls"
-  - azure data lake
-  # AWS ecosystem (production)
-  - aws glue
-  - amazon glue
-  - amazon athena
-  - amazon redshift
-  - redshift
-  - amazon s3
-  - "s3"
-  - aws lambda
-  - lambda
-  # Transformation / orchestration (production)
-  - dbt
-  - airflow
-  - apache airflow
-  # BI (production)
-  - power bi
-  # Languages (production)
-  - python
-  - sql
-  - "t-sql"
-  - tsql
-
-# ─────────────────────────────────────────────────────────────────────
-# TIER 2 STACK — "familiar with" no CV, ainda valoriza mas menos peso
-# ─────────────────────────────────────────────────────────────────────
-tier_2_stack:
-  - snowflake
-  - kafka
-  - confluent
-  - kinesis
-  - kubernetes
-  - "k8s"
-  - terraform
-  - gcp
-  - google cloud
-  - bigquery
-  - great expectations
-  - openlineage
-  - prefect
-  - dagster
-  - emr
-  - sagemaker
-  - data factory       # cobertura adicional para variações
-  - unity catalog
-  - vector database
-  - mlops
-
-# ─────────────────────────────────────────────────────────────────────
-# DOMAIN BONUS — skills raras que aparecem no CV
-# ─────────────────────────────────────────────────────────────────────
-domain_bonus:
-  - sap s/4hana
-  - sap s4hana
-  - sap erp
-  - sap bw
-  - star schema
-  - data warehouse modeling
-  - dimensional modeling
-  - data observability
-  - data governance
-  - dataops
-  - cost optimization
-  - migration to azure
-  - cloud migration
-  - legacy modernization
-
-# ─────────────────────────────────────────────────────────────────────
-# INDUSTRY BOOST — vaga em vertical onde o Mauricio tem histórico
-# ─────────────────────────────────────────────────────────────────────
-industry_boost:
-  - oil and gas
-  - oil & gas
-  - "o&g"
-  - petroleum
-  - renewable energy
-  - clean energy
-  - solar energy
-  - wind energy
-  - logistics
-  - supply chain
-  - mobility
-  - fleet
-  - automotive
-  - healthcare
-  - pharma
-  - dermocosmetics
-  - cosmetics
-  - manufacturing
-  - industrial
-  - consulting
-
-# ─────────────────────────────────────────────────────────────────────
-# REGIÕES — 3 tiers de prioridade
-# ─────────────────────────────────────────────────────────────────────
-region_tier_1:           # USD remote LATAM — prioridade máxima
-  - remote latam
-  - remote latin america
-  - remote americas
-  - latam remote
-  - latam-based
-  - remote brazil
-  - remote argentina
-  - remote chile
-  - remote colombia
-  - remote mexico
-  - remote uruguay
-  - remote peru
-  - americas (remote)
-  - remote (americas)
-  - work from latin america
-  - work from brazil
-  - paid in usd
-  - usd compensation
-
-region_tier_2:           # EUR Espanha/EU remote — plano híbrido
-  # Modalidade remota
-  - remote spain
-  - remote españa
-  - españa remoto
-  - remote europe
-  - remote eu
-  - eu remote
-  - europe remote
-  - remote portugal
-  - remote uk
-  - remote ireland
-  - remote germany
-  - remote netherlands
-  - eu-based
-  - emea remote
-  - eu time zone
-  # Países EU (vagas EU sponsor têm cidade/país no location)
-  - germany
-  - alemania
-  - alemanha
-  - netherlands
-  - países bajos
-  - holanda
-  - ireland
-  - irlanda
-  - spain
-  - españa
-  - espanha
-  - portugal
-  - france
-  - francia
-  - france
-  - europe
-  - europa
-  # Grandes cidades EU
-  - berlin
-  - munich
-  - münchen
-  - hamburg
-  - frankfurt
-  - cologne
-  - köln
-  - amsterdam
-  - rotterdam
-  - eindhoven
-  - utrecht
-  - dublin
-  - cork
-  - madrid
-  - barcelona
-  - valencia
-  - sevilla
-  - granada
-  - lisbon
-  - lisboa
-  - porto
-  - paris
-
-region_tier_3:           # outras regiões — vale a pena olhar mas só se score já alto
-  - remote
-  - global
-  - worldwide
-  - anywhere
-  - work from anywhere
-  - distributed
-
-# ─────────────────────────────────────────────────────────────────────
-# CURRENCY HINTS
-# ─────────────────────────────────────────────────────────────────────
-currency_usd:
-  - "usd"
-  - "us$"
-  - "$"
-  - dollar
-  - dollars
-  - paid in dollars
-  - usd compensation
-  - usd salary
-
-currency_eur:
-  - "eur"
-  - "€"
-  - euro
-  - euros
-  - paid in euros
-  - eur compensation
-  - eur salary
-
-# ─────────────────────────────────────────────────────────────────────
-# SENIORITY (5+ anos, mira em Sr+)
-# ─────────────────────────────────────────────────────────────────────
-seniority_signals:
-  - senior
-  - "sr."
-  - "sr "
-  - sênior
-  - senor      # variação ES
-  - staff
-  - lead
-  - principal
-  - "iv"
-  - "iii"
-  - tech lead
-
-# ─────────────────────────────────────────────────────────────────────
-# LANGUAGE HINTS — vagas em ES pegam bonus
-# ─────────────────────────────────────────────────────────────────────
-language_es_signals:
-  - se busca
-  - buscamos
-  - ofrecemos
-  - imprescindible
-  - requisitos
-  - ingeniero
-  - desarrollador
-  - empresa
-
-# ─────────────────────────────────────────────────────────────────────
-# BLOCKED — descarte automático (curto-circuito)
-# ─────────────────────────────────────────────────────────────────────
-blocked:
-  # Localização restrita (sem chance de remote LATAM)
-  - must reside in the united states
-  - us citizens only
-  - us-based only
-  - eligible to work in the us only
-  - authorized to work in the united states
-  - canadian citizens only
-  - must be located in canada
-  - on-site only
-  - onsite only
-  - on site only
-  - hybrid on-site
-  - "relocation required"
-  - relocate to
-  - security clearance
-  - top secret clearance
-  - clearance required
-  - polygraph
-  # Seniority mismatch
-  - junior data engineer
-  - entry level data engineer
-  - data engineer intern
-  - data engineer internship
-  - trainee data engineer
-  - graduate program
-  - new grad
-  - "0-1 years"
-  - "0-2 years"
-  # Role mismatch (papéis diferentes que pegam por keyword colateral)
-  - data scientist
-  - "ml engineer"
-  - machine learning engineer
-  - mle ii
-  - mle iii
-  - mlops engineer
-  - data analyst (não é engenharia)
-  - business intelligence analyst
-  - data steward
-  - data architect lead
-  # Contratos não compatíveis
-  - "part-time only"
-  - "part time only"
-  - unpaid
-  - volunteer
