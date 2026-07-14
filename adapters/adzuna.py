@@ -79,19 +79,21 @@ ONSITE_SIGNALS = (
     "must relocate", "relocation required",
 )
 
-# Domínios de baixa qualidade — agregadores brasileiros genéricos
-# que repostam vagas sem contexto real, sem empresa identificada,
-# sem salário, geralmente spam ou vagas duplicadas de outra fonte
+# W2 e requerimentos americanos — bloqueia
+US_EMPLOYMENT_SIGNALS = (
+    " w2 ", "w2 contract", "w2 only",
+    "must be authorized to work",
+    "authorized to work in the us",
+    "us work authorization",
+    "security clearance",
+    "us citizen",
+)
+
+# Agregadores BR genéricos — sem empresa real, sem salário, sem detalhe
 BLOCKED_SOURCE_DOMAINS = (
     "buscarvagas.com.br",
     "empregos.com.br",
-    "vagas.com.br",          # ok pra volume mas muita vaga sem detalhe
-    "sine.br",
-    "catho.com.br",          # CLT-focused, raramente remote USD
-    "infojobs.com.br",       # mesmo problema
     "trabalhabrasil.com.br",
-    "trampos.co",
-    "empregare.com",
     "curriculum.com.br",
     "recolocacao.com.br",
     "netvagas.com.br",
@@ -99,8 +101,11 @@ BLOCKED_SOURCE_DOMAINS = (
     "jobatus.com.br",
     "jobomas.com",
     "wizbii.com",
-    "melhor.emprego.com.br",
 )
+
+# Vagas que parecem LATAM mas são pra contratar americanos pra trabalhar COM LATAM
+# ou requerem vínculo empregatício americano (W2 = só pra quem tem autorização de trabalho EUA)
+US_EMPLOYMENT_SIGNALS = (
     " w2 ",
     "w2 contract",
     "w2 only",
@@ -164,6 +169,11 @@ def _fetch_page(country: str, page: int, params: dict) -> dict | None:
         return None
 
 
+def _is_blocked_source(url: str) -> bool:
+    url_lower = url.lower()
+    return any(d in url_lower for d in BLOCKED_SOURCE_DOMAINS)
+
+
 def _is_confidently_remote(title: str, description: str, location: str) -> bool:
     haystack = (title + " " + description + " " + location).lower()
 
@@ -185,23 +195,9 @@ def _is_confidently_remote(title: str, description: str, location: str) -> bool:
     return False
 
 
-def _is_blocked_source(url: str) -> bool:
-    """Bloqueia vagas originadas de agregadores BR genéricos."""
-    url_lower = url.lower()
-    for domain in BLOCKED_SOURCE_DOMAINS:
-        if domain in url_lower:
-            return True
-    return False
-
-
 def _parse_job(item: dict, query_id: str, country: str) -> JobPosting | None:
     title = item.get("title", "").strip()
     if not title:
-        return None
-
-    # Bloqueia se URL de origem é agregador BR genérico
-    redirect_url = item.get("redirect_url", "")
-    if _is_blocked_source(redirect_url):
         return None
 
     location_obj = item.get("location", {}) or {}
@@ -210,6 +206,11 @@ def _parse_job(item: dict, query_id: str, country: str) -> JobPosting | None:
                 else location_obj.get("display_name", ""))
 
     original_description = _strip_html(item.get("description", ""))
+
+    # Bloqueia agregadores BR genéricos
+    redirect_url = item.get("redirect_url", "")
+    if _is_blocked_source(redirect_url):
+        return None
 
     if not _is_confidently_remote(title, original_description, location):
         return None

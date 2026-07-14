@@ -48,6 +48,14 @@ companies:
   # │ JOBICY — RSS remote jobs LATAM/Brazil                           │
   # └─────────────────────────────────────────────────────────────────┘
 
+  - name: RemoteRocketship
+    url: https://www.remoterocketship.com/jobs/data-engineer
+    strategy: job_board_aggregator
+    tier_priority: A
+    phase: 1
+    ats: remoterocketship
+    handle: all
+    notes: "RSS feed. 300+ vagas DE remote LATAM indexadas."
   - name: Jobicy LATAM
     url: https://jobicy.com/remote-jobs
     strategy: job_board_aggregator
