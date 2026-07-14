@@ -1,28 +1,54 @@
 # ═══════════════════════════════════════════════════════════════════════
-# COMPANIES v8 — FOCO 100% LATAM REMOTE USD
-# ═══════════════════════════════════════════════════════════════════════
-# Removidas TODAS as empresas EU sponsor (não é mercado real sem cidadania).
-# Focado só em Fase 1: contratos USD remote LATAM.
+# COMPANIES v15 — LATAM REMOTE USD ONLY
 # ═══════════════════════════════════════════════════════════════════════
 
 companies:
 
   # ┌─────────────────────────────────────────────────────────────────┐
-  # │ ADZUNA — fonte primária LATAM/US/CA remote (vagas frescas)      │
+  # │ GET ON BOARD — onde Ruzora, Artefact, staffing LATAM publicam   │
+  # └─────────────────────────────────────────────────────────────────┘
+
+  - name: Get on Board
+    url: https://www.getonbrd.com/jobs-Data%20science
+    strategy: job_board_aggregator
+    tier_priority: A
+    phase: 1
+    ats: getonboard
+    handle: all
+    notes: "API pública. Ruzora, Artefact LatAm e staffing USD remote publicam aqui."
+
+  # ┌─────────────────────────────────────────────────────────────────┐
+  # │ JOBICY — RSS remote jobs LATAM/Brazil                           │
+  # └─────────────────────────────────────────────────────────────────┘
+
+  - name: Jobicy LATAM
+    url: https://jobicy.com/remote-jobs
+    strategy: job_board_aggregator
+    tier_priority: A
+    phase: 1
+    ats: jobicy
+    handle: all
+    notes: "RSS feed. Vagas remote data science LATAM/Brazil."
+
+  # ┌─────────────────────────────────────────────────────────────────┐
+  # │ ADZUNA — complementar pra BR/US/CA                              │
   # └─────────────────────────────────────────────────────────────────┘
 
   - name: Adzuna LATAM
     url: https://www.adzuna.com/
     strategy: job_board_aggregator
-    tier_priority: A
+    tier_priority: B
     phase: 1
     ats: adzuna
     handle: all
-    notes: "BR + US LATAM + CA LATAM. max_days_old=3."
+    notes: "BR + US LATAM + CA LATAM. max_days_old=4."
 
   # ┌─────────────────────────────────────────────────────────────────┐
-  # │ MANUAL NETWORKS — Tier A USD (signup + screening)               │
-  # │ Estratégia: signar em todos, entrar no pool                     │
+  # │ EU SPONSOR (Fase 2) — handles Greenhouse verificados            │
+  # └─────────────────────────────────────────────────────────────────┘
+
+  # ┌─────────────────────────────────────────────────────────────────┐
+  # │ MANUAL NETWORKS — apenas geram lembrete no manual_signups.md    │
   # └─────────────────────────────────────────────────────────────────┘
 
   - name: Athyna
@@ -30,52 +56,45 @@ companies:
     strategy: manual_network
     tier_priority: A
     phase: 1
-    notes: "LATAM + USD. Signup + screening obrigatório."
+    notes: "LATAM + USD. Signup + screening."
 
   - name: Toptal
     url: https://www.toptal.com/talent/apply
     strategy: manual_network
     tier_priority: A
     phase: 1
-    notes: "Top 3%. Multi-step interview."
 
   - name: Andela
     url: https://andela.com/talent
     strategy: manual_network
     tier_priority: A
     phase: 1
-    notes: "Global network."
 
   - name: Braintrust
     url: https://www.usebraintrust.com/join
     strategy: manual_network
     tier_priority: A
     phase: 1
-    notes: "Marketplace token-based."
 
   - name: X-Team
     url: https://x-team.com/developers
     strategy: manual_network
     tier_priority: A
     phase: 1
-    notes: "Long-term contracts. Alto DE demand."
 
   - name: A.Team
     url: https://www.a.team/join
     strategy: manual_network
     tier_priority: A
     phase: 1
-    notes: "Senior/staff focus."
 
   - name: Arc.dev
     url: https://arc.dev/remote-jobs
     strategy: manual_network
     tier_priority: A
     phase: 1
-    notes: "Remote-first. Job board próprio."
 
 # ═══════════════════════════════════════════════════════════════════════
-# TOTAL: 8 empresas (1 Adzuna LATAM + 7 Manual Networks USD)
-# Removidas: EU sponsor (HelloFresh, N26, Stripe, Celonis, Contentful,
-# Typeform, Cabify, GetYourGuide, Intercom, Flix, TradeRepublic, Delivery Hero)
+# TOTAL: 10 empresas (Get on Board + Jobicy + Adzuna + 7 Manual Networks)
+# EU sponsors removidas — foco 100% LATAM remote USD
 # ═══════════════════════════════════════════════════════════════════════

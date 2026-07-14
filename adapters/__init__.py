@@ -260,9 +260,16 @@ def _load_adzuna():
     ADAPTERS.update(ADZUNA_ADAPTERS)
 
 
+def _load_latam():
+    from adapters.latam_sources import LATAM_ADAPTERS
+    ADAPTERS.update(LATAM_ADAPTERS)
+
+
 def fetch_for(ats: str, handle: str) -> list[JobPosting]:
     if ats == "adzuna" and "adzuna" not in ADAPTERS:
         _load_adzuna()
+    if ats in ("getonboard", "jobicy") and ats not in ADAPTERS:
+        _load_latam()
     fn = ADAPTERS.get(ats)
     if fn is None:
         logger.warning("no adapter for ATS '%s' (handle=%s)", ats, handle)
