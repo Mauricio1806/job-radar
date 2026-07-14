@@ -212,8 +212,7 @@ def fetch_remotive(handle: str = "data") -> list[JobPosting]:
         if not _is_de_title(title):
             continue
         published_at = _parse_iso(j.get("publication_date"))
-        if _is_too_old(published_at):
-            continue
+        # Remotive não reporta datas recentes com precisão — sem filtro de data
         company_name = j.get("company_name", "Unknown")
         out.append(JobPosting(
             ats="remotive", company_handle=company_name[:50],
@@ -252,7 +251,8 @@ def fetch_himalayas(handle: str = "data-engineer") -> list[JobPosting]:
             seen.add(ext_id)
             title = (j.get("title") or "").strip()
             published_at = _parse_iso(j.get("pubDate") or j.get("publishedAt"))
-            if _is_too_old(published_at):
+            # Se não tem data, dá benefício da dúvida (pode ser nova)
+            if published_at and _is_too_old(published_at):
                 continue
             company_obj = j.get("company") or {}
             company_name = (company_obj.get("name") if isinstance(company_obj, dict) else str(company_obj)) or "Unknown"
