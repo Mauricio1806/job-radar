@@ -82,6 +82,65 @@ companies:
   # │ EU SPONSOR (Fase 2) — handles Greenhouse verificados            │
   # └─────────────────────────────────────────────────────────────────┘
 
+
+  # ┌─────────────────────────────────────────────────────────────────┐
+  # │ STAFFING LATAM USD — da lista LinkedIn (handles verificados)     │
+  # └─────────────────────────────────────────────────────────────────┘
+
+  - name: GoFasti
+    url: https://boards.greenhouse.io/gofasti
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: greenhouse
+    handle: gofasti
+    notes: "TopTalent from LatAm. Greenhouse confirmado. Remote LATAM USD."
+
+  - name: DistantJob
+    url: https://job-boards.greenhouse.io/distantjob
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: greenhouse
+    handle: distantjob
+    notes: "12 vagas ativas. TEM Sr Data Engineer Remote aberta agora. Greenhouse confirmado."
+
+  - name: 3Pillar Global
+    url: https://jobs.lever.co/3pillarglobal
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: lever
+    handle: 3pillarglobal
+    notes: "Global consulting com LATAM. Lever confirmado."
+
+  - name: G2i Inc
+    url: https://jobs.ashbyhq.com/g2i
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: ashby
+    handle: g2i
+    notes: "Developer marketplace remote. Ashby confirmado."
+
+  - name: Truelogic
+    url: https://jobs.ashbyhq.com/truelogic
+    strategy: usd_contractor
+    tier_priority: B
+    phase: 1
+    ats: ashby
+    handle: truelogic
+    notes: "Staffing LATAM. Ashby confirmado. Volume alto, dedup ativo."
+
+  - name: Nimble.LA
+    url: https://jobs.lever.co/nimbletalent
+    strategy: usd_contractor
+    tier_priority: B
+    phase: 1
+    ats: lever
+    handle: nimbletalent
+    notes: "Talent-as-a-service LATAM. Handle a confirmar no CI."
+
   # ┌─────────────────────────────────────────────────────────────────┐
   # │ MANUAL NETWORKS — apenas geram lembrete no manual_signups.md    │
   # └─────────────────────────────────────────────────────────────────┘
