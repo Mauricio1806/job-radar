@@ -246,9 +246,62 @@ def fetch_personio(handle: str) -> list[JobPosting]:
 
 
 # Registry
+def fetch_ashby(handle: str) -> list[JobPosting]:
+    """Ashby usa GraphQL público."""
+    import json as _json
+    QUERY = """
+    query ApiJobBoardWithTeams($organizationHostedJobsPageName: String!) {
+      jobBoard: jobBoardWithTeams(organizationHostedJobsPageName: $organizationHostedJobsPageName) {
+        jobPostings {
+          id title locationName employmentType isRemote
+          publishedDate
+          jobPostingState
+          teams { name }
+          compensationTierSummary
+        }
+      }
+    }
+    """
+    try:
+        response = requests.post(
+            "https://jobs.ashbyhq.com/api/non-user-graphql?op=ApiJobBoardWithTeams",
+            json={"operationName": "ApiJobBoardWithTeams",
+                  "variables": {"organizationHostedJobsPageName": handle},
+                  "query": QUERY},
+            headers={**HEADERS, "Content-Type": "application/json"},
+            timeout=REQUEST_TIMEOUT,
+        )
+        response.raise_for_status()
+        data = response.json()
+    except (requests.RequestException, ValueError) as exc:
+        raise AdapterError(f"ashby {handle}: {exc}") from exc
+
+    postings = (data.get("data") or {}).get("jobBoard", {}).get("jobPostings", []) or []
+    out: list[JobPosting] = []
+    for p in postings:
+        title = (p.get("title") or "").strip()
+        location = p.get("locationName") or ""
+        remote = bool(p.get("isRemote", False)) or _detect_remote(location)
+        dept = (p.get("teams") or [{}])[0].get("name") if p.get("teams") else None
+        published = p.get("publishedDate")
+        url = f"https://jobs.ashbyhq.com/{handle}/{p.get('id', '')}"
+        out.append(JobPosting(
+            ats="ashby", company_handle=handle,
+            external_id=str(p.get("id", "")),
+            title=title, location=location,
+            remote_flag=remote, description="",
+            url=url,
+            posted_at=_parse_iso(published),
+            department=dept, raw=p,
+        ))
+    time.sleep(POLITE_DELAY)
+    return out
+
+
 ADAPTERS: dict[str, Any] = {
     "greenhouse": fetch_greenhouse,
     "lever": fetch_lever,
+    "ashby": fetch_ashby,
     "smartrecruiters": fetch_smartrecruiters,
     "workable": fetch_workable,
     "personio": fetch_personio,
