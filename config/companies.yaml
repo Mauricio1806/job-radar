@@ -160,6 +160,41 @@ companies:
     tier_priority: A
     phase: 1
 
+    - name: OnHires
+    url: https://jobs.ashbyhq.com/onhires
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: ashby
+    handle: onhires
+    notes: "Tem Sr Data Engineer LATAM aberta. A vaga que você achou."
+
+  - name: Launchpad Technologies
+    url: https://job-boards.greenhouse.io/launchpadtechnologiesinc
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: greenhouse
+    handle: launchpadtechnologiesinc
+    notes: "LATAM nearshore. Data Engineer LATAM Remote. USD contractor."
+
+  - name: NimbleGravity
+    url: https://job-boards.greenhouse.io/nimblegravity
+    strategy: usd_contractor
+    tier_priority: B
+    phase: 1
+    ats: greenhouse
+    handle: nimblegravity
+
+  - name: Rula
+    url: https://jobs.ashbyhq.com/rula
+    strategy: usd_contractor
+    tier_priority: B
+    phase: 1
+    ats: ashby
+    handle: rula
+    notes: "Remote-first. Staff Data Engineer Remote."
+
 # ═══════════════════════════════════════════════════════════════════════
 # TOTAL: 19 empresas (6 aggregators + 6 staffing direto + 7 manual)
 # REMOVIDOS: RemoteRocketship (403 no CI), HatchWorks/Velozient/Kambda (sem ATS público)
