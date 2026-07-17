@@ -105,8 +105,17 @@ def _parse_epoch_ms(value: Any) -> Optional[datetime]:
 # ─── ATS adapters existentes (Greenhouse, Lever, Ashby, etc.) ───
 
 def fetch_greenhouse(handle: str) -> list[JobPosting]:
-    url = f"https://boards-api.greenhouse.io/v1/boards/{handle}/jobs"
-    data = _http_get(url, params={"content": "true"})
+    # Tenta boards-api primeiro, se 404 tenta job-boards (novo endpoint)
+    for base in ["https://boards-api.greenhouse.io/v1/boards",
+                 "https://job-boards.greenhouse.io/v1/boards"]:
+        try:
+            url = f"{base}/{handle}/jobs"
+            data = _http_get(url, params={"content": "true"})
+            break
+        except AdapterError as exc:
+            if "404" in str(exc) and base != "https://job-boards.greenhouse.io/v1/boards":
+                continue
+            raise
     jobs = data.get("jobs", []) if isinstance(data, dict) else []
     out: list[JobPosting] = []
     for j in jobs:
@@ -247,32 +256,50 @@ def fetch_personio(handle: str) -> list[JobPosting]:
 
 # Registry
 def fetch_ashby(handle: str) -> list[JobPosting]:
-    """Ashby REST public API: GET /posting-api/job-board/{handle}"""
-    url = f"https://api.ashbyhq.com/posting-api/job-board/{handle}?includeCompensation=true"
+    """Ashby usa GraphQL público."""
+    import json as _json
+    QUERY = """
+    query ApiJobBoardWithTeams($organizationHostedJobsPageName: String!) {
+      jobBoard: jobBoardWithTeams(organizationHostedJobsPageName: $organizationHostedJobsPageName) {
+        jobPostings {
+          id title locationName employmentType isRemote
+          publishedDate
+          jobPostingState
+          teams { name }
+          compensationTierSummary
+        }
+      }
+    }
+    """
     try:
-        response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        response = requests.post(
+            "https://jobs.ashbyhq.com/api/non-user-graphql?op=ApiJobBoardWithTeams",
+            json={"operationName": "ApiJobBoardWithTeams",
+                  "variables": {"organizationHostedJobsPageName": handle},
+                  "query": QUERY},
+            headers={**HEADERS, "Content-Type": "application/json"},
+            timeout=REQUEST_TIMEOUT,
+        )
         response.raise_for_status()
         data = response.json()
     except (requests.RequestException, ValueError) as exc:
         raise AdapterError(f"ashby {handle}: {exc}") from exc
 
-    postings = data.get("jobPostings", []) or []
+    postings = (data.get("data") or {}).get("jobBoard", {}).get("jobPostings", []) or []
     out: list[JobPosting] = []
     for p in postings:
         title = (p.get("title") or "").strip()
         location = p.get("locationName") or ""
         remote = bool(p.get("isRemote", False)) or _detect_remote(location)
-        dept = p.get("departmentName") or p.get("teamName") or ""
-        published = p.get("publishedAt") or p.get("updatedAt")
-        job_id = p.get("id", "")
-        apply_url = p.get("applyUrl") or f"https://jobs.ashbyhq.com/{handle}/{job_id}"
+        dept = (p.get("teams") or [{}])[0].get("name") if p.get("teams") else None
+        published = p.get("publishedDate")
+        url = f"https://jobs.ashbyhq.com/{handle}/{p.get('id', '')}"
         out.append(JobPosting(
             ats="ashby", company_handle=handle,
-            external_id=str(job_id),
+            external_id=str(p.get("id", "")),
             title=title, location=location,
-            remote_flag=remote,
-            description=_strip_html(p.get("descriptionHtml", ""))[:2000],
-            url=apply_url,
+            remote_flag=remote, description="",
+            url=url,
             posted_at=_parse_iso(published),
             department=dept, raw=p,
         ))
@@ -300,11 +327,18 @@ def _load_latam():
     ADAPTERS.update(LATAM_ADAPTERS)
 
 
+def _load_playwright():
+    from adapters.playwright_scraper import PLAYWRIGHT_ADAPTERS
+    ADAPTERS.update(PLAYWRIGHT_ADAPTERS)
+
+
 def fetch_for(ats: str, handle: str) -> list[JobPosting]:
     if ats == "adzuna" and "adzuna" not in ADAPTERS:
         _load_adzuna()
     if ats in ("getonboard", "jobicy", "remotive", "himalayas", "wwr", "remoterocketship") and ats not in ADAPTERS:
         _load_latam()
+    if ats in ("koombea", "tecla", "devlane", "parallelstaff", "distillery", "scopic") and ats not in ADAPTERS:
+        _load_playwright()
     fn = ADAPTERS.get(ats)
     if fn is None:
         logger.warning("no adapter for ATS '%s' (handle=%s)", ats, handle)
