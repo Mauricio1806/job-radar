@@ -20,17 +20,12 @@ Pipeline não consegue scrapear; você precisa aplicar manualmente.
 | Azumo | B | ⏳ manual | [apply](https://azumo.com/jobs/) |  |
 | BEON.tech | B | ⏳ manual | [apply](https://beon.tech/jobs) |  |
 | CloudDevs | B | ⏳ manual | [apply](https://clouddevs.com/join-as-developer/) |  |
-| Devlane | B | ⏳ manual | [apply](https://jobs.devlane.com/) |  |
-| Distillery | B | ⏳ manual | [apply](https://distillery.com/jobs/) |  |
 | Koombea | B | ⏳ manual | [apply](https://www.koombea.com/jobs) |  |
 | Lemon.io | B | ⏳ manual | [apply](https://lemon.io/apply) |  |
 | Near | B | ⏳ manual | [apply](https://jobs.hirewithnear.com/) |  |
-| ParallelStaff | B | ⏳ manual | [apply](https://parallelstaff.com/jobs/) |  |
 | Proxify | B | ⏳ manual | [apply](https://proxify.io/apply) |  |
 | Remotebase | B | ⏳ manual | [apply](https://remotebase.com/jobs) |  |
 | Revelo | B | ⏳ manual | [apply](https://jobs.revelo.com/) |  |
-| Scopic | B | ⏳ manual | [apply](https://scopicsoftware.com/careers/) |  |
-| TECLA | B | ⏳ manual | [apply](https://jobs.tecla.io/) |  |
 | Tekton Labs | B | ⏳ manual | [apply](https://tektonlabs.com/jobs/) |  |
 | Turing | B | ⏳ manual | [apply](https://developers.turing.com/jobs) |  |
 | VanHack | B | ⏳ manual | [apply](https://app.vanhack.com/jobs) |  |
