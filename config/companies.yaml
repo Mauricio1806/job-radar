@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════
-# COMPANIES v27 — LATAM REMOTE USD — com Playwright
+# COMPANIES v28 — handles corrigidos
 # ═══════════════════════════════════════════════════════════════════════
 
 companies:
@@ -38,14 +38,6 @@ companies:
     ats: wwr
     handle: data
 
-  - name: Jobicy LATAM
-    url: https://jobicy.com/remote-jobs
-    strategy: job_board_aggregator
-    tier_priority: A
-    phase: 1
-    ats: jobicy
-    handle: all
-
   - name: Adzuna LATAM
     url: https://www.adzuna.com/
     strategy: job_board_aggregator
@@ -79,7 +71,7 @@ companies:
     phase: 1
     ats: greenhouse
     handle: nearsure
-    notes: "Sr Data and Insight Engineer aberta agora."
+    notes: "Senior Data Engineer + Data Engineer Talent Connection abertas agora."
 
   - name: Rootstrap
     url: https://job-boards.greenhouse.io/rootstrap
@@ -113,7 +105,6 @@ companies:
     phase: 1
     ats: greenhouse
     handle: turing
-    notes: "Vagas internas Turing — nem todas LATAM."
 
   # ── STAFFING LATAM USD — LEVER ─────────────────────────────────────
 
@@ -132,6 +123,15 @@ companies:
     phase: 1
     ats: lever
     handle: nimbletalent
+
+  - name: TECLA
+    url: https://jobs.lever.co/TECLA
+    strategy: usd_contractor
+    tier_priority: B
+    phase: 1
+    ats: lever
+    handle: TECLA
+    notes: "Lever confirmado. Sem vagas agora mas monitora."
 
   # ── STAFFING LATAM USD — ASHBY ─────────────────────────────────────
 
@@ -167,7 +167,7 @@ companies:
     ats: ashby
     handle: rula
 
-  # ── PLAYWRIGHT — sites JS-rendered sem API pública ─────────────────
+  # ── PLAYWRIGHT — sites JS-rendered ─────────────────────────────────
 
   - name: Koombea
     url: https://www.koombea.com/jobs/
@@ -176,25 +176,6 @@ companies:
     phase: 1
     ats: koombea
     handle: all
-    notes: "Playwright — JS rendered."
-
-  - name: TECLA
-    url: https://jobs.tecla.io/
-    strategy: usd_contractor
-    tier_priority: B
-    phase: 1
-    ats: tecla
-    handle: all
-    notes: "Playwright — JS rendered."
-
-  - name: Devlane
-    url: https://jobs.devlane.com/
-    strategy: usd_contractor
-    tier_priority: B
-    phase: 1
-    ats: devlane
-    handle: all
-    notes: "Playwright — JS rendered."
 
   - name: ParallelStaff
     url: https://parallelstaff.com/jobs/
@@ -203,16 +184,6 @@ companies:
     phase: 1
     ats: parallelstaff
     handle: all
-    notes: "Playwright — JS rendered."
-
-  - name: Distillery
-    url: https://distillery.com/jobs/
-    strategy: usd_contractor
-    tier_priority: B
-    phase: 1
-    ats: distillery
-    handle: all
-    notes: "Playwright — JS rendered."
 
   - name: Scopic
     url: https://scopicsoftware.com/careers/
@@ -221,7 +192,6 @@ companies:
     phase: 1
     ats: scopic
     handle: all
-    notes: "Playwright — JS rendered."
 
   # ── MANUAL NETWORKS ────────────────────────────────────────────────
 
@@ -344,3 +314,17 @@ companies:
     strategy: manual_network
     tier_priority: B
     phase: 1
+
+  - name: Devlane
+    url: https://devlane.com/careers
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+    notes: "jobs.devlane.com offline — URL nova a verificar."
+
+  - name: Distillery
+    url: https://distillery.com/jobs/
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+    notes: "Cloudflare bloqueia Playwright. Manual por enquanto."

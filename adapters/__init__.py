@@ -105,17 +105,26 @@ def _parse_epoch_ms(value: Any) -> Optional[datetime]:
 # ─── ATS adapters existentes (Greenhouse, Lever, Ashby, etc.) ───
 
 def fetch_greenhouse(handle: str) -> list[JobPosting]:
-    # Tenta boards-api primeiro, se 404 tenta job-boards (novo endpoint)
-    for base in ["https://boards-api.greenhouse.io/v1/boards",
-                 "https://job-boards.greenhouse.io/v1/boards"]:
+    """
+    Suporta dois endpoints do Greenhouse:
+    - boards-api.greenhouse.io (API v1 clássica)
+    - job-boards.greenhouse.io/api/v1 (API v2 novo endpoint)
+    Tenta o clássico primeiro, se 404 tenta o novo.
+    """
+    data = None
+    for url in [
+        f"https://boards-api.greenhouse.io/v1/boards/{handle}/jobs",
+        f"https://job-boards.greenhouse.io/api/v1/boards/{handle}/jobs",
+    ]:
         try:
-            url = f"{base}/{handle}/jobs"
             data = _http_get(url, params={"content": "true"})
             break
         except AdapterError as exc:
-            if "404" in str(exc) and base != "https://job-boards.greenhouse.io/v1/boards":
+            if "404" in str(exc):
                 continue
             raise
+    if data is None:
+        raise AdapterError(f"greenhouse {handle}: 404 em ambos endpoints")
     jobs = data.get("jobs", []) if isinstance(data, dict) else []
     out: list[JobPosting] = []
     for j in jobs:
