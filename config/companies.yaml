@@ -1,12 +1,10 @@
 # ═══════════════════════════════════════════════════════════════════════
-# COMPANIES v23 — LATAM REMOTE USD ONLY (definitivo)
+# COMPANIES v26 — LATAM REMOTE USD — YAML LIMPO E VALIDADO
 # ═══════════════════════════════════════════════════════════════════════
 
 companies:
 
-  # ┌─────────────────────────────────────────────────────────────────┐
-  # │ AGGREGATORS — APIs públicas, cobertura ampla                    │
-  # └─────────────────────────────────────────────────────────────────┘
+  # ── AGGREGATORS ────────────────────────────────────────────────────
 
   - name: Get on Board
     url: https://www.getonbrd.com/jobs-Data%20science
@@ -55,11 +53,8 @@ companies:
     phase: 1
     ats: adzuna
     handle: all
-    notes: "BR + US LATAM + CA LATAM. max_days_old=4."
 
-  # ┌─────────────────────────────────────────────────────────────────┐
-  # │ STAFFING LATAM USD — ATS direto verificados                     │
-  # └─────────────────────────────────────────────────────────────────┘
+  # ── STAFFING LATAM USD — GREENHOUSE ────────────────────────────────
 
   - name: GoFasti
     url: https://boards.greenhouse.io/gofasti
@@ -68,7 +63,6 @@ companies:
     phase: 1
     ats: greenhouse
     handle: gofasti
-    notes: "TopTalent from LatAm. Remote LATAM USD."
 
   - name: DistantJob
     url: https://job-boards.greenhouse.io/distantjob
@@ -77,7 +71,48 @@ companies:
     phase: 1
     ats: greenhouse
     handle: distantjob
-    notes: "Staffing remote. Sr DE aberta recentemente."
+
+  - name: Nearsure
+    url: https://job-boards.greenhouse.io/nearsure
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: greenhouse
+    handle: nearsure
+
+  - name: Rootstrap
+    url: https://job-boards.greenhouse.io/rootstrap
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: greenhouse
+    handle: rootstrap
+
+  - name: Launchpad Technologies
+    url: https://job-boards.greenhouse.io/launchpadtechnologiesinc
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: greenhouse
+    handle: launchpadtechnologiesinc
+
+  - name: NimbleGravity
+    url: https://job-boards.greenhouse.io/nimblegravity
+    strategy: usd_contractor
+    tier_priority: B
+    phase: 1
+    ats: greenhouse
+    handle: nimblegravity
+
+  - name: Turing Portal
+    url: https://job-boards.greenhouse.io/turingportal
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: greenhouse
+    handle: turingportal
+
+  # ── STAFFING LATAM USD — LEVER ─────────────────────────────────────
 
   - name: 3Pillar Global
     url: https://jobs.lever.co/3pillarglobal
@@ -86,7 +121,32 @@ companies:
     phase: 1
     ats: lever
     handle: 3pillarglobal
-    notes: "Global consulting com LATAM office."
+
+  - name: Nimble.LA
+    url: https://jobs.lever.co/nimbletalent
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: lever
+    handle: nimbletalent
+
+  - name: Very
+    url: https://jobs.lever.co/very
+    strategy: usd_contractor
+    tier_priority: B
+    phase: 1
+    ats: lever
+    handle: very
+
+  # ── STAFFING LATAM USD — ASHBY ─────────────────────────────────────
+
+  - name: OnHires
+    url: https://jobs.ashbyhq.com/onhires
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: ashby
+    handle: onhires
 
   - name: G2i Inc
     url: https://jobs.ashbyhq.com/g2i
@@ -95,7 +155,6 @@ companies:
     phase: 1
     ats: ashby
     handle: g2i
-    notes: "Developer marketplace remote USD."
 
   - name: Truelogic
     url: https://jobs.ashbyhq.com/truelogic
@@ -104,19 +163,16 @@ companies:
     phase: 1
     ats: ashby
     handle: truelogic
-    notes: "Staffing LATAM USD."
 
-  - name: Nimble.LA
-    url: https://jobs.lever.co/nimbletalent
+  - name: Rula
+    url: https://jobs.ashbyhq.com/rula
     strategy: usd_contractor
     tier_priority: B
     phase: 1
-    ats: lever
-    handle: nimbletalent
+    ats: ashby
+    handle: rula
 
-  # ┌─────────────────────────────────────────────────────────────────┐
-  # │ MANUAL NETWORKS — Tier A USD (signup obrigatório)               │
-  # └─────────────────────────────────────────────────────────────────┘
+  # ── MANUAL NETWORKS — signup obrigatório ───────────────────────────
 
   - name: Athyna
     url: https://www.athyna.com/talent
@@ -160,42 +216,123 @@ companies:
     tier_priority: A
     phase: 1
 
-    - name: OnHires
-    url: https://jobs.ashbyhq.com/onhires
-    strategy: usd_contractor
+  - name: Gun.io
+    url: https://gun.io/find-work
+    strategy: manual_network
     tier_priority: A
     phase: 1
-    ats: ashby
-    handle: onhires
-    notes: "Tem Sr Data Engineer LATAM aberta. A vaga que você achou."
 
-  - name: Launchpad Technologies
-    url: https://job-boards.greenhouse.io/launchpadtechnologiesinc
-    strategy: usd_contractor
+  - name: Crossover
+    url: https://www.crossover.com/jobs
+    strategy: manual_network
     tier_priority: A
     phase: 1
-    ats: greenhouse
-    handle: launchpadtechnologiesinc
-    notes: "LATAM nearshore. Data Engineer LATAM Remote. USD contractor."
 
-  - name: NimbleGravity
-    url: https://job-boards.greenhouse.io/nimblegravity
-    strategy: usd_contractor
+  - name: Terminal
+    url: https://www.terminal.io/engineers
+    strategy: manual_network
+    tier_priority: A
+    phase: 1
+
+  - name: Turing
+    url: https://developers.turing.com/jobs
+    strategy: manual_network
     tier_priority: B
     phase: 1
-    ats: greenhouse
-    handle: nimblegravity
 
-  - name: Rula
-    url: https://jobs.ashbyhq.com/rula
-    strategy: usd_contractor
+  - name: Lemon.io
+    url: https://lemon.io/apply
+    strategy: manual_network
     tier_priority: B
     phase: 1
-    ats: ashby
-    handle: rula
-    notes: "Remote-first. Staff Data Engineer Remote."
 
-# ═══════════════════════════════════════════════════════════════════════
-# TOTAL: 19 empresas (6 aggregators + 6 staffing direto + 7 manual)
-# REMOVIDOS: RemoteRocketship (403 no CI), HatchWorks/Velozient/Kambda (sem ATS público)
-# ═══════════════════════════════════════════════════════════════════════
+  - name: Proxify
+    url: https://proxify.io/apply
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: Remotebase
+    url: https://remotebase.com/jobs
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: Revelo
+    url: https://jobs.revelo.com/
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: Near
+    url: https://jobs.hirewithnear.com/
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: VanHack
+    url: https://app.vanhack.com/jobs
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: TECLA
+    url: https://jobs.tecla.io/
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: Devlane
+    url: https://jobs.devlane.com/
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: Azumo
+    url: https://azumo.com/jobs/
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: CloudDevs
+    url: https://clouddevs.com/join-as-developer/
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: Distillery
+    url: https://distillery.com/jobs/
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: Scopic
+    url: https://scopicsoftware.com/careers/
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: BEON.tech
+    url: https://beon.tech/jobs
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: Tekton Labs
+    url: https://tektonlabs.com/jobs/
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: ParallelStaff
+    url: https://parallelstaff.com/jobs/
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
+  - name: Koombea
+    url: https://www.koombea.com/jobs
+    strategy: manual_network
+    tier_priority: B
+    phase: 1
+
