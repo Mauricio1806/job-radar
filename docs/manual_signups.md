@@ -20,6 +20,8 @@ Pipeline não consegue scrapear; você precisa aplicar manualmente.
 | Azumo | B | ⏳ manual | [apply](https://azumo.com/jobs/) |  |
 | BEON.tech | B | ⏳ manual | [apply](https://beon.tech/jobs) |  |
 | CloudDevs | B | ⏳ manual | [apply](https://clouddevs.com/join-as-developer/) |  |
+| Devlane | B | ⏳ manual | [apply](https://devlane.com/careers) | jobs.devlane.com offline — URL nova a verificar. |
+| Distillery | B | ⏳ manual | [apply](https://distillery.com/jobs/) | Cloudflare bloqueia Playwright. Manual por enquanto. |
 | Koombea | B | ⏳ manual | [apply](https://www.koombea.com/jobs) |  |
 | Lemon.io | B | ⏳ manual | [apply](https://lemon.io/apply) |  |
 | Near | B | ⏳ manual | [apply](https://jobs.hirewithnear.com/) |  |
