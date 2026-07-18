@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════
-# COMPANIES v28 — handles corrigidos
+# COMPANIES v30 — limpo, handles verificados
 # ═══════════════════════════════════════════════════════════════════════
 
 companies:
@@ -46,7 +46,7 @@ companies:
     ats: adzuna
     handle: all
 
-  # ── STAFFING LATAM USD — GREENHOUSE ────────────────────────────────
+  # ── STAFFING LATAM USD — GREENHOUSE API v1 ─────────────────────────
 
   - name: GoFasti
     url: https://boards.greenhouse.io/gofasti
@@ -63,24 +63,6 @@ companies:
     phase: 1
     ats: greenhouse
     handle: distantjob
-
-  - name: Nearsure
-    url: https://job-boards.greenhouse.io/nearsure
-    strategy: usd_contractor
-    tier_priority: A
-    phase: 1
-    ats: greenhouse
-    handle: nearsure
-    notes: "Senior Data Engineer + Data Engineer Talent Connection abertas agora."
-
-  - name: Rootstrap
-    url: https://job-boards.greenhouse.io/rootstrap
-    strategy: usd_contractor
-    tier_priority: A
-    phase: 1
-    ats: greenhouse
-    handle: rootstrap
-    notes: "Argentina/Colombia/Uruguay remote."
 
   - name: Launchpad Technologies
     url: https://job-boards.greenhouse.io/launchpadtechnologiesinc
@@ -105,6 +87,26 @@ companies:
     phase: 1
     ats: greenhouse
     handle: turing
+
+  # ── STAFFING LATAM USD — GREENHOUSE API v3 (novo endpoint) ─────────
+
+  - name: Nearsure
+    url: https://job-boards.greenhouse.io/nearsure
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: greenhouse
+    handle: nearsure
+    notes: "API v3. Senior Data Engineer + Data Engineer Talent Connection abertas."
+
+  - name: Rootstrap
+    url: https://job-boards.greenhouse.io/rootstrap
+    strategy: usd_contractor
+    tier_priority: A
+    phase: 1
+    ats: greenhouse
+    handle: rootstrap
+    notes: "API v3. Argentina/Colombia/Uruguay remote."
 
   # ── STAFFING LATAM USD — LEVER ─────────────────────────────────────
 
@@ -131,7 +133,6 @@ companies:
     phase: 1
     ats: lever
     handle: TECLA
-    notes: "Lever confirmado. Sem vagas agora mas monitora."
 
   # ── STAFFING LATAM USD — ASHBY ─────────────────────────────────────
 
@@ -167,7 +168,7 @@ companies:
     ats: ashby
     handle: rula
 
-  # ── PLAYWRIGHT — sites JS-rendered ─────────────────────────────────
+  # ── PLAYWRIGHT ─────────────────────────────────────────────────────
 
   - name: Koombea
     url: https://www.koombea.com/jobs/
@@ -320,11 +321,10 @@ companies:
     strategy: manual_network
     tier_priority: B
     phase: 1
-    notes: "jobs.devlane.com offline — URL nova a verificar."
 
   - name: Distillery
     url: https://distillery.com/jobs/
     strategy: manual_network
     tier_priority: B
     phase: 1
-    notes: "Cloudflare bloqueia Playwright. Manual por enquanto."
+

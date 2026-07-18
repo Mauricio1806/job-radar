@@ -87,14 +87,6 @@ US_EMPLOYMENT_SIGNALS = (
     "us work authorization",
     "security clearance",
     "us citizen",
-    "united states only",
-    "us only",
-    "must be based in the us",
-    "must be located in the us",
-    "must reside in the us",
-    "must reside in the united states",
-    "based in the united states",
-    "located in the united states",
 )
 
 # Agregadores BR genéricos — sem empresa real, sem salário, sem detalhe

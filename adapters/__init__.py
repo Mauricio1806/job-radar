@@ -107,25 +107,34 @@ def _parse_epoch_ms(value: Any) -> Optional[datetime]:
 def fetch_greenhouse(handle: str) -> list[JobPosting]:
     """
     Suporta dois endpoints do Greenhouse:
-    - boards-api.greenhouse.io (API v1 clássica)
-    - job-boards.greenhouse.io/api/v1 (API v2 novo endpoint)
-    Tenta o clássico primeiro, se 404 tenta o novo.
+    1. boards-api.greenhouse.io (API v1 clássica — a maioria das empresas)
+    2. job-boards.greenhouse.io/api/v3 (API v3 novo endpoint — Nearsure, Rootstrap, etc.)
     """
-    data = None
-    for url in [
-        f"https://boards-api.greenhouse.io/v1/boards/{handle}/jobs",
-        f"https://job-boards.greenhouse.io/api/v1/boards/{handle}/jobs",
-    ]:
-        try:
-            data = _http_get(url, params={"content": "true"})
-            break
-        except AdapterError as exc:
-            if "404" in str(exc):
-                continue
+    # Tenta API v1 clássica primeiro
+    try:
+        url = f"https://boards-api.greenhouse.io/v1/boards/{handle}/jobs"
+        data = _http_get(url, params={"content": "true"})
+        jobs = data.get("jobs", []) if isinstance(data, dict) else []
+        if jobs is not None:  # retornou OK mesmo que lista vazia
+            return _parse_greenhouse_jobs(handle, jobs)
+    except AdapterError as exc:
+        if "404" not in str(exc):
             raise
-    if data is None:
-        raise AdapterError(f"greenhouse {handle}: 404 em ambos endpoints")
-    jobs = data.get("jobs", []) if isinstance(data, dict) else []
+
+    # Se 404, tenta API v3 (job-boards.greenhouse.io)
+    try:
+        url = f"https://job-boards.greenhouse.io/api/v3/boards/{handle}/jobs"
+        data = _http_get(url)
+        jobs = data.get("jobs", []) if isinstance(data, dict) else []
+        return _parse_greenhouse_jobs(handle, jobs)
+    except AdapterError as exc:
+        if "404" not in str(exc):
+            raise
+
+    raise AdapterError(f"greenhouse {handle}: handle não encontrado em nenhum endpoint")
+
+
+def _parse_greenhouse_jobs(handle: str, jobs: list) -> list[JobPosting]:
     out: list[JobPosting] = []
     for j in jobs:
         location = (j.get("location") or {}).get("name", "") or ""
