@@ -2,7 +2,7 @@
 # KEYWORDS v19 — Senior + Strong Mid focus
 # ═══════════════════════════════════════════════════════════════════════
 
-threshold: 10
+threshold: 14
 
 max_age_days: 999   # Controle de data feito na fonte (Adzuna max_days_old, GOB filter)
 
@@ -275,10 +275,16 @@ blocked_titles:
 # Bloqueio de tokens no texto (descrição/título/location)
 blocked:
   - "us only"
+  - "united states only"
   - "must be us citizen"
   - "us citizens only"
   - "only us"
   - "must be located in the us"
+  - "must reside in the us"
+  - "must reside in the united states"
+  - "based in the united states"
+  - "located in the united states"
+  - "must be based in the us"
   - "onsite only"
   - "no remote"
 
