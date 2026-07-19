@@ -87,6 +87,20 @@ US_EMPLOYMENT_SIGNALS = (
     "us work authorization",
     "security clearance",
     "us citizen",
+    "united states only",
+    "us only",
+    "must be based in the us",
+    "located in the united states",
+    "must reside in the us",
+)
+
+# Cidades americanas — se location é uma dessas E vaga vem de query us-*, bloqueia
+US_LOCATIONS = (
+    "san francisco", "new york", "new york city", "los angeles", "chicago",
+    "austin", "seattle", "boston", "denver", "atlanta", "dallas", "miami",
+    "washington dc", "washington, dc", "portland", "nashville", "salt lake city",
+    "minneapolis", "phoenix", "detroit", "philadelphia", "california", "texas",
+    "new jersey", "illinois", "washington state",
 )
 
 # Agregadores BR genéricos — sem empresa real, sem salário, sem detalhe
@@ -174,7 +188,7 @@ def _is_blocked_source(url: str) -> bool:
     return any(d in url_lower for d in BLOCKED_SOURCE_DOMAINS)
 
 
-def _is_confidently_remote(title: str, description: str, location: str) -> bool:
+def _is_confidently_remote(title: str, description: str, location: str, query_id: str = "") -> bool:
     haystack = (title + " " + description + " " + location).lower()
 
     # Bloqueia hybrid/onsite explícito
@@ -186,6 +200,13 @@ def _is_confidently_remote(title: str, description: str, location: str) -> bool:
     for us_signal in US_EMPLOYMENT_SIGNALS:
         if us_signal in haystack:
             return False
+
+    # Se vem de query US e location é cidade americana = não é LATAM remote
+    if query_id.startswith("us-"):
+        loc_lower = location.lower()
+        for us_city in US_LOCATIONS:
+            if us_city in loc_lower:
+                return False
 
     # Precisa ter sinal claro de remote
     for signal in REMOTE_SIGNALS:
@@ -212,7 +233,7 @@ def _parse_job(item: dict, query_id: str, country: str) -> JobPosting | None:
     if _is_blocked_source(redirect_url):
         return None
 
-    if not _is_confidently_remote(title, original_description, location):
+    if not _is_confidently_remote(title, original_description, location, query_id):
         return None
 
     # ⚡ Injeta tokens sintéticos no fim da descrição

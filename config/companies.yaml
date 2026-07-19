@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════
-# COMPANIES v30 — limpo, handles verificados
+# COMPANIES v31 — DEFINITIVO
 # ═══════════════════════════════════════════════════════════════════════
 
 companies:
@@ -46,7 +46,7 @@ companies:
     ats: adzuna
     handle: all
 
-  # ── STAFFING LATAM USD — GREENHOUSE API v1 ─────────────────────────
+  # ── GREENHOUSE API v1 (boards-api.greenhouse.io) ───────────────────
 
   - name: GoFasti
     url: https://boards.greenhouse.io/gofasti
@@ -57,7 +57,7 @@ companies:
     handle: gofasti
 
   - name: DistantJob
-    url: https://job-boards.greenhouse.io/distantjob
+    url: https://boards.greenhouse.io/distantjob
     strategy: usd_contractor
     tier_priority: A
     phase: 1
@@ -65,7 +65,7 @@ companies:
     handle: distantjob
 
   - name: Launchpad Technologies
-    url: https://job-boards.greenhouse.io/launchpadtechnologiesinc
+    url: https://boards.greenhouse.io/launchpadtechnologiesinc
     strategy: usd_contractor
     tier_priority: A
     phase: 1
@@ -73,7 +73,7 @@ companies:
     handle: launchpadtechnologiesinc
 
   - name: NimbleGravity
-    url: https://job-boards.greenhouse.io/nimblegravity
+    url: https://boards.greenhouse.io/nimblegravity
     strategy: usd_contractor
     tier_priority: B
     phase: 1
@@ -81,34 +81,34 @@ companies:
     handle: nimblegravity
 
   - name: Turing
-    url: https://job-boards.greenhouse.io/turing
+    url: https://boards.greenhouse.io/turing
     strategy: usd_contractor
     tier_priority: B
     phase: 1
     ats: greenhouse
     handle: turing
 
-  # ── STAFFING LATAM USD — GREENHOUSE API v3 (novo endpoint) ─────────
+  # ── GREENHOUSE PLAYWRIGHT (job-boards.greenhouse.io JS-rendered) ───
 
   - name: Nearsure
     url: https://job-boards.greenhouse.io/nearsure
     strategy: usd_contractor
     tier_priority: A
     phase: 1
-    ats: greenhouse
-    handle: nearsure
-    notes: "API v3. Senior Data Engineer + Data Engineer Talent Connection abertas."
+    ats: nearsure
+    handle: all
+    notes: "Playwright — novo Greenhouse JS. Sr Data Engineer aberta."
 
   - name: Rootstrap
     url: https://job-boards.greenhouse.io/rootstrap
     strategy: usd_contractor
     tier_priority: A
     phase: 1
-    ats: greenhouse
-    handle: rootstrap
-    notes: "API v3. Argentina/Colombia/Uruguay remote."
+    ats: rootstrap
+    handle: all
+    notes: "Playwright — novo Greenhouse JS. Argentina/Colombia/Uruguay."
 
-  # ── STAFFING LATAM USD — LEVER ─────────────────────────────────────
+  # ── LEVER ──────────────────────────────────────────────────────────
 
   - name: 3Pillar Global
     url: https://jobs.lever.co/3pillarglobal
@@ -134,7 +134,7 @@ companies:
     ats: lever
     handle: TECLA
 
-  # ── STAFFING LATAM USD — ASHBY ─────────────────────────────────────
+  # ── ASHBY ──────────────────────────────────────────────────────────
 
   - name: OnHires
     url: https://jobs.ashbyhq.com/onhires
@@ -168,7 +168,7 @@ companies:
     ats: ashby
     handle: rula
 
-  # ── PLAYWRIGHT ─────────────────────────────────────────────────────
+  # ── PLAYWRIGHT OUTROS ──────────────────────────────────────────────
 
   - name: Koombea
     url: https://www.koombea.com/jobs/
@@ -268,12 +268,6 @@ companies:
     tier_priority: B
     phase: 1
 
-  - name: Remotebase
-    url: https://remotebase.com/jobs
-    strategy: manual_network
-    tier_priority: B
-    phase: 1
-
   - name: Revelo
     url: https://jobs.revelo.com/
     strategy: manual_network
@@ -327,4 +321,3 @@ companies:
     strategy: manual_network
     tier_priority: B
     phase: 1
-

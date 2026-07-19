@@ -315,7 +315,118 @@ def fetch_scopic(handle: str = "all") -> list[JobPosting]:
     return out
 
 
+
+
+# ──────────────────────────────────────────────────────────────────────
+# NEARSURE (job-boards.greenhouse.io - novo Greenhouse JS-rendered)
+# ──────────────────────────────────────────────────────────────────────
+def fetch_nearsure(handle: str = "all") -> list[JobPosting]:
+    from bs4 import BeautifulSoup
+    import re, json
+
+    url = "https://job-boards.greenhouse.io/nearsure"
+    sync_playwright = _get_playwright()
+    if not sync_playwright:
+        return []
+
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 800},
+            )
+            page = context.new_page()
+            page.goto(url, wait_until="networkidle", timeout=20000)
+            time.sleep(3)
+            html = page.content()
+            browser.close()
+    except Exception as exc:
+        logger.warning("Nearsure Playwright failed: %s", exc)
+        return []
+
+    soup = BeautifulSoup(html, "html.parser")
+    out: list[JobPosting] = []
+    seen: set[str] = set()
+
+    for link in soup.find_all("a", href=re.compile(r"/nearsure/\d+")):
+        title = link.get_text(" ", strip=True)
+        href = link.get("href", "")
+        if not title or not _is_de_title(title):
+            continue
+        ext_id = href.split("/")[-1]
+        if ext_id in seen:
+            continue
+        seen.add(ext_id)
+        full_url = href if href.startswith("http") else f"https://job-boards.greenhouse.io{href}"
+        out.append(JobPosting(
+            ats="playwright", company_handle="nearsure",
+            external_id=ext_id, title=title, location="Remote LATAM",
+            remote_flag=True, description="",
+            url=full_url, posted_at=None,
+            raw={"_company_label": "Nearsure"},
+        ))
+
+    logger.info("Nearsure: %d DE jobs", len(out))
+    return out
+
+
+# ──────────────────────────────────────────────────────────────────────
+# ROOTSTRAP (job-boards.greenhouse.io - novo Greenhouse JS-rendered)
+# ──────────────────────────────────────────────────────────────────────
+def fetch_rootstrap(handle: str = "all") -> list[JobPosting]:
+    from bs4 import BeautifulSoup
+    import re
+
+    url = "https://job-boards.greenhouse.io/rootstrap"
+    sync_playwright = _get_playwright()
+    if not sync_playwright:
+        return []
+
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 800},
+            )
+            page = context.new_page()
+            page.goto(url, wait_until="networkidle", timeout=20000)
+            time.sleep(3)
+            html = page.content()
+            browser.close()
+    except Exception as exc:
+        logger.warning("Rootstrap Playwright failed: %s", exc)
+        return []
+
+    soup = BeautifulSoup(html, "html.parser")
+    out: list[JobPosting] = []
+    seen: set[str] = set()
+
+    for link in soup.find_all("a", href=re.compile(r"/rootstrap/\d+")):
+        title = link.get_text(" ", strip=True)
+        href = link.get("href", "")
+        if not title or not _is_de_title(title):
+            continue
+        ext_id = href.split("/")[-1]
+        if ext_id in seen:
+            continue
+        seen.add(ext_id)
+        full_url = href if href.startswith("http") else f"https://job-boards.greenhouse.io{href}"
+        out.append(JobPosting(
+            ats="playwright", company_handle="rootstrap",
+            external_id=ext_id, title=title, location="Remote LATAM",
+            remote_flag=True, description="",
+            url=full_url, posted_at=None,
+            raw={"_company_label": "Rootstrap"},
+        ))
+
+    logger.info("Rootstrap: %d DE jobs", len(out))
+    return out
+
 PLAYWRIGHT_ADAPTERS = {
+    "nearsure": fetch_nearsure,
+    "rootstrap": fetch_rootstrap,
     "koombea": fetch_koombea,
     "tecla": fetch_tecla,
     "devlane": fetch_devlane,
