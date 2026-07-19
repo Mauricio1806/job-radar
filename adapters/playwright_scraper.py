@@ -349,7 +349,7 @@ def fetch_nearsure(handle: str = "all") -> list[JobPosting]:
     out: list[JobPosting] = []
     seen: set[str] = set()
 
-    for link in soup.find_all("a", href=re.compile(r"/nearsure/\d+")):
+    for link in soup.find_all("a", href=re.compile(r"/nearsure/jobs/\d+")):
         title = link.get_text(" ", strip=True)
         href = link.get("href", "")
         if not title or not _is_de_title(title):
@@ -403,7 +403,7 @@ def fetch_rootstrap(handle: str = "all") -> list[JobPosting]:
     out: list[JobPosting] = []
     seen: set[str] = set()
 
-    for link in soup.find_all("a", href=re.compile(r"/rootstrap/\d+")):
+    for link in soup.find_all("a", href=re.compile(r"/rootstrap/jobs/\d+")):
         title = link.get_text(" ", strip=True)
         href = link.get("href", "")
         if not title or not _is_de_title(title):

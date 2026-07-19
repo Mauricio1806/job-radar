@@ -158,6 +158,10 @@ def _parse_gob_job(item: dict, seen_ids: set) -> JobPosting | None:
     location = (", ".join(str(l) for l in locations[:2])
                 if isinstance(locations, list) else str(locations)) or "Remote LATAM"
 
+    # Bloqueia vagas restringidas a países que não incluem Brasil
+    if not _is_brazil_accessible(location, ""):
+        return None
+
     company_obj = attrs.get("company") or {}
     if isinstance(company_obj, dict):
         company_name = ((company_obj.get("data", {}) or {})
@@ -324,8 +328,7 @@ def fetch_wwr(handle: str = "data") -> list[JobPosting]:
     return out
 
 
-# ──────────────────────────────────────────────────────────────────────
-# REMOTE ROCKETSHIP — HTML scraping (RSS tem XML inválido)
+
 # ──────────────────────────────────────────────────────────────────────
 import re as _re
 
@@ -426,6 +429,5 @@ LATAM_ADAPTERS = {
     "remotive": fetch_remotive,
     "himalayas": fetch_himalayas,
     "wwr": fetch_wwr,
-    "remoterocketship": fetch_remoterocketship,
-    "jobicy": fetch_jobicy,
+        "jobicy": fetch_jobicy,
 }
