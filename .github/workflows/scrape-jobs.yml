@@ -34,52 +34,64 @@ jobs:
 
       - name: Force companies.yaml clean
         run: |
-          cat > config/companies.yaml << 'YAML'
-          companies:
-            - {name: "Get on Board", url: "https://www.getonbrd.com", strategy: job_board_aggregator, tier_priority: A, phase: 1, ats: getonboard, handle: all}
-            - {name: "Remotive", url: "https://remotive.com", strategy: job_board_aggregator, tier_priority: A, phase: 1, ats: remotive, handle: data}
-            - {name: "Himalayas", url: "https://himalayas.app/jobs", strategy: job_board_aggregator, tier_priority: A, phase: 1, ats: himalayas, handle: data-engineer}
-            - {name: "We Work Remotely", url: "https://weworkremotely.com", strategy: job_board_aggregator, tier_priority: A, phase: 1, ats: wwr, handle: data}
-            - {name: "Adzuna LATAM", url: "https://www.adzuna.com", strategy: job_board_aggregator, tier_priority: B, phase: 1, ats: adzuna, handle: all}
-            - {name: "GoFasti", url: "https://boards.greenhouse.io/gofasti", strategy: usd_contractor, tier_priority: A, phase: 1, ats: greenhouse, handle: gofasti}
-            - {name: "DistantJob", url: "https://boards.greenhouse.io/distantjob", strategy: usd_contractor, tier_priority: A, phase: 1, ats: greenhouse, handle: distantjob}
-            - {name: "Launchpad Technologies", url: "https://boards.greenhouse.io/launchpadtechnologiesinc", strategy: usd_contractor, tier_priority: A, phase: 1, ats: greenhouse, handle: launchpadtechnologiesinc}
-            - {name: "NimbleGravity", url: "https://boards.greenhouse.io/nimblegravity", strategy: usd_contractor, tier_priority: B, phase: 1, ats: greenhouse, handle: nimblegravity}
-            - {name: "Turing", url: "https://boards.greenhouse.io/turing", strategy: usd_contractor, tier_priority: B, phase: 1, ats: greenhouse, handle: turing}
-            - {name: "Nearsure", url: "https://job-boards.greenhouse.io/nearsure", strategy: usd_contractor, tier_priority: A, phase: 1, ats: nearsure, handle: all}
-            - {name: "Rootstrap", url: "https://job-boards.greenhouse.io/rootstrap", strategy: usd_contractor, tier_priority: A, phase: 1, ats: rootstrap, handle: all}
-            - {name: "3Pillar Global", url: "https://jobs.lever.co/3pillarglobal", strategy: usd_contractor, tier_priority: A, phase: 1, ats: lever, handle: 3pillarglobal}
-            - {name: "Nimble.LA", url: "https://jobs.lever.co/nimbletalent", strategy: usd_contractor, tier_priority: A, phase: 1, ats: lever, handle: nimbletalent}
-            - {name: "TECLA", url: "https://jobs.lever.co/TECLA", strategy: usd_contractor, tier_priority: B, phase: 1, ats: lever, handle: TECLA}
-            - {name: "OnHires", url: "https://jobs.ashbyhq.com/onhires", strategy: usd_contractor, tier_priority: A, phase: 1, ats: ashby, handle: onhires}
-            - {name: "G2i Inc", url: "https://jobs.ashbyhq.com/g2i", strategy: usd_contractor, tier_priority: A, phase: 1, ats: ashby, handle: g2i}
-            - {name: "Truelogic", url: "https://jobs.ashbyhq.com/truelogic", strategy: usd_contractor, tier_priority: B, phase: 1, ats: ashby, handle: truelogic}
-            - {name: "Rula", url: "https://jobs.ashbyhq.com/rula", strategy: usd_contractor, tier_priority: B, phase: 1, ats: ashby, handle: rula}
-            - {name: "Koombea", url: "https://www.koombea.com/jobs/", strategy: usd_contractor, tier_priority: B, phase: 1, ats: koombea, handle: all}
-            - {name: "ParallelStaff", url: "https://parallelstaff.com/jobs/", strategy: usd_contractor, tier_priority: B, phase: 1, ats: parallelstaff, handle: all}
-            - {name: "Scopic", url: "https://scopicsoftware.com/careers/", strategy: usd_contractor, tier_priority: B, phase: 1, ats: scopic, handle: all}
-            - {name: "Athyna", url: "https://www.athyna.com/talent", strategy: manual_network, tier_priority: A, phase: 1}
-            - {name: "Toptal", url: "https://www.toptal.com/talent/apply", strategy: manual_network, tier_priority: A, phase: 1}
-            - {name: "Andela", url: "https://andela.com/talent", strategy: manual_network, tier_priority: A, phase: 1}
-            - {name: "Braintrust", url: "https://www.usebraintrust.com/join", strategy: manual_network, tier_priority: A, phase: 1}
-            - {name: "X-Team", url: "https://x-team.com/developers", strategy: manual_network, tier_priority: A, phase: 1}
-            - {name: "A.Team", url: "https://www.a.team/join", strategy: manual_network, tier_priority: A, phase: 1}
-            - {name: "Arc.dev", url: "https://arc.dev/remote-jobs", strategy: manual_network, tier_priority: A, phase: 1}
-            - {name: "Gun.io", url: "https://gun.io/find-work", strategy: manual_network, tier_priority: A, phase: 1}
-            - {name: "Crossover", url: "https://www.crossover.com/jobs", strategy: manual_network, tier_priority: A, phase: 1}
-            - {name: "Terminal", url: "https://www.terminal.io/engineers", strategy: manual_network, tier_priority: A, phase: 1}
-            - {name: "Lemon.io", url: "https://lemon.io/apply", strategy: manual_network, tier_priority: B, phase: 1}
-            - {name: "Proxify", url: "https://proxify.io/apply", strategy: manual_network, tier_priority: B, phase: 1}
-            - {name: "Revelo", url: "https://jobs.revelo.com/", strategy: manual_network, tier_priority: B, phase: 1}
-            - {name: "Near", url: "https://jobs.hirewithnear.com/", strategy: manual_network, tier_priority: B, phase: 1}
-            - {name: "VanHack", url: "https://app.vanhack.com/jobs", strategy: manual_network, tier_priority: B, phase: 1}
-            - {name: "Azumo", url: "https://azumo.com/jobs/", strategy: manual_network, tier_priority: B, phase: 1}
-            - {name: "CloudDevs", url: "https://clouddevs.com/join-as-developer/", strategy: manual_network, tier_priority: B, phase: 1}
-            - {name: "BEON.tech", url: "https://beon.tech/jobs", strategy: manual_network, tier_priority: B, phase: 1}
-            - {name: "Tekton Labs", url: "https://tektonlabs.com/jobs/", strategy: manual_network, tier_priority: B, phase: 1}
-            - {name: "Devlane", url: "https://devlane.com/careers", strategy: manual_network, tier_priority: B, phase: 1}
-            - {name: "Distillery", url: "https://distillery.com/jobs/", strategy: manual_network, tier_priority: B, phase: 1}
-          YAML
+          python3 - << 'PYEOF'
+          import yaml, pathlib
+          companies = [
+            # AGGREGATORS
+            {"name": "Get on Board", "url": "https://www.getonbrd.com", "strategy": "job_board_aggregator", "tier_priority": "A", "phase": 1, "ats": "getonboard", "handle": "all"},
+            {"name": "Remotive", "url": "https://remotive.com", "strategy": "job_board_aggregator", "tier_priority": "A", "phase": 1, "ats": "remotive", "handle": "data"},
+            {"name": "Himalayas", "url": "https://himalayas.app/jobs", "strategy": "job_board_aggregator", "tier_priority": "A", "phase": 1, "ats": "himalayas", "handle": "data-engineer"},
+            {"name": "We Work Remotely", "url": "https://weworkremotely.com", "strategy": "job_board_aggregator", "tier_priority": "A", "phase": 1, "ats": "wwr", "handle": "data"},
+            {"name": "Adzuna LATAM", "url": "https://www.adzuna.com", "strategy": "job_board_aggregator", "tier_priority": "B", "phase": 1, "ats": "adzuna", "handle": "all"},
+            # GREENHOUSE
+            {"name": "GoFasti", "url": "https://boards.greenhouse.io/gofasti", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "greenhouse", "handle": "gofasti"},
+            {"name": "DistantJob", "url": "https://boards.greenhouse.io/distantjob", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "greenhouse", "handle": "distantjob"},
+            {"name": "Nearsure", "url": "https://job-boards.greenhouse.io/nearsure", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "greenhouse", "handle": "nearsure"},
+            {"name": "Rootstrap", "url": "https://job-boards.greenhouse.io/rootstrap", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "greenhouse", "handle": "rootstrap"},
+            {"name": "Launchpad Technologies", "url": "https://boards.greenhouse.io/launchpadtechnologiesinc", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "greenhouse", "handle": "launchpadtechnologiesinc"},
+            {"name": "NimbleGravity", "url": "https://boards.greenhouse.io/nimblegravity", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "greenhouse", "handle": "nimblegravity"},
+            {"name": "Turing", "url": "https://boards.greenhouse.io/turing", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "greenhouse", "handle": "turing"},
+            # LEVER
+            {"name": "3Pillar Global", "url": "https://jobs.lever.co/3pillarglobal", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "lever", "handle": "3pillarglobal"},
+            {"name": "Nimble.LA", "url": "https://jobs.lever.co/nimbletalent", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "lever", "handle": "nimbletalent"},
+            {"name": "TECLA", "url": "https://jobs.lever.co/TECLA", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "lever", "handle": "TECLA"},
+            # ASHBY
+            {"name": "OnHires", "url": "https://jobs.ashbyhq.com/onhires", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "ashby", "handle": "onhires"},
+            {"name": "G2i Inc", "url": "https://jobs.ashbyhq.com/g2i", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "ashby", "handle": "g2i"},
+            {"name": "Truelogic", "url": "https://jobs.ashbyhq.com/truelogic", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "ashby", "handle": "truelogic"},
+            {"name": "Rula", "url": "https://jobs.ashbyhq.com/rula", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "ashby", "handle": "rula"},
+            # PLAYWRIGHT
+            {"name": "Koombea", "url": "https://www.koombea.com/jobs/", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "koombea", "handle": "all"},
+            {"name": "ParallelStaff", "url": "https://parallelstaff.com/jobs/", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "parallelstaff", "handle": "all"},
+            {"name": "Scopic", "url": "https://scopicsoftware.com/careers/", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "scopic", "handle": "all"},
+            # MANUAL
+            {"name": "Athyna", "url": "https://www.athyna.com/talent", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
+            {"name": "Toptal", "url": "https://www.toptal.com/talent/apply", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
+            {"name": "Andela", "url": "https://andela.com/talent", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
+            {"name": "Braintrust", "url": "https://www.usebraintrust.com/join", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
+            {"name": "X-Team", "url": "https://x-team.com/developers", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
+            {"name": "A.Team", "url": "https://www.a.team/join", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
+            {"name": "Arc.dev", "url": "https://arc.dev/remote-jobs", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
+            {"name": "Gun.io", "url": "https://gun.io/find-work", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
+            {"name": "Crossover", "url": "https://www.crossover.com/jobs", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
+            {"name": "Terminal", "url": "https://www.terminal.io/engineers", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
+            {"name": "Lemon.io", "url": "https://lemon.io/apply", "strategy": "manual_network", "tier_priority": "B", "phase": 1},
+            {"name": "Proxify", "url": "https://proxify.io/apply", "strategy": "manual_network", "tier_priority": "B", "phase": 1},
+            {"name": "Revelo", "url": "https://jobs.revelo.com/", "strategy": "manual_network", "tier_priority": "B", "phase": 1},
+            {"name": "Near", "url": "https://jobs.hirewithnear.com/", "strategy": "manual_network", "tier_priority": "B", "phase": 1},
+            {"name": "VanHack", "url": "https://app.vanhack.com/jobs", "strategy": "manual_network", "tier_priority": "B", "phase": 1},
+            {"name": "Azumo", "url": "https://azumo.com/jobs/", "strategy": "manual_network", "tier_priority": "B", "phase": 1},
+            {"name": "CloudDevs", "url": "https://clouddevs.com/join-as-developer/", "strategy": "manual_network", "tier_priority": "B", "phase": 1},
+            {"name": "BEON.tech", "url": "https://beon.tech/jobs", "strategy": "manual_network", "tier_priority": "B", "phase": 1},
+            {"name": "Tekton Labs", "url": "https://tektonlabs.com/jobs/", "strategy": "manual_network", "tier_priority": "B", "phase": 1},
+            {"name": "Devlane", "url": "https://devlane.com/careers", "strategy": "manual_network", "tier_priority": "B", "phase": 1},
+            {"name": "Distillery", "url": "https://distillery.com/jobs/", "strategy": "manual_network", "tier_priority": "B", "phase": 1},
+          ]
+          pathlib.Path("config/companies.yaml").write_text(
+            yaml.dump({"companies": companies}, allow_unicode=True, sort_keys=False)
+          )
+          print(f"✅ companies.yaml: {len(companies)} empresas")
+          PYEOF
 
       - name: Detect ATS for new companies
         run: python pipeline.py detect

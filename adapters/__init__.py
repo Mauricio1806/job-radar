@@ -124,7 +124,8 @@ def fetch_greenhouse(handle: str) -> list[JobPosting]:
                 continue
             raise
     if data is None:
-        raise AdapterError(f"greenhouse {handle}: 404 em ambos endpoints — tentando endpoint novo")
+        logger.warning("greenhouse %s: 404 em ambos endpoints clássicos, tentando _data=", handle)
+        return fetch_greenhouse_new(handle)
     if data is None:
         return fetch_greenhouse_new(handle)
     jobs = data.get("jobs", []) if isinstance(data, dict) else []
