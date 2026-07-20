@@ -124,7 +124,9 @@ def fetch_greenhouse(handle: str) -> list[JobPosting]:
                 continue
             raise
     if data is None:
-        raise AdapterError(f"greenhouse {handle}: 404 em ambos endpoints")
+        raise AdapterError(f"greenhouse {handle}: 404 em ambos endpoints — tentando endpoint novo")
+    if data is None:
+        return fetch_greenhouse_new(handle)
     jobs = data.get("jobs", []) if isinstance(data, dict) else []
     out: list[JobPosting] = []
     for j in jobs:
@@ -316,6 +318,70 @@ def fetch_ashby(handle: str) -> list[JobPosting]:
     return out
 
 
+def fetch_greenhouse_new(handle: str) -> list[JobPosting]:
+    """
+    Greenhouse novo (job-boards.greenhouse.io) com endpoint JSON _data=
+    GET https://job-boards.greenhouse.io/{handle}?page=1&_data=
+    Accept: application/json
+    Retorna: {"jobPosts": {"data": [...], "total_pages": N}}
+    """
+    headers_json = {**HEADERS, "Accept": "application/json"}
+    out: list[JobPosting] = []
+    page = 1
+    while True:
+        url = f"https://job-boards.greenhouse.io/{handle}"
+        try:
+            data = _http_get(url, params={"page": page, "_data": ""})
+        except AdapterError as exc:
+            logger.warning("greenhouse_new %s p%d: %s", handle, page, exc)
+            break
+        
+        posts = []
+        if isinstance(data, dict):
+            job_posts = data.get("jobPosts") or {}
+            posts = job_posts.get("data", []) or []
+            total_pages = job_posts.get("total_pages", 1) or 1
+        elif isinstance(data, list):
+            posts = data
+            total_pages = 1
+        
+        for j in posts:
+            title = (j.get("title") or "").strip()
+            location_obj = j.get("location") or {}
+            if isinstance(location_obj, dict):
+                location = location_obj.get("name", "") or ""
+            else:
+                location = str(location_obj) or ""
+            
+            content_html = j.get("content", "") or j.get("description", "") or ""
+            description = _strip_html(content_html)
+            remote = _detect_remote(location, description[:500])
+            
+            posted = j.get("updated_at") or j.get("published_at")
+            job_id = str(j.get("id", ""))
+            apply_url = (j.get("absolute_url") or 
+                        f"https://job-boards.greenhouse.io/{handle}/jobs/{job_id}")
+            
+            out.append(JobPosting(
+                ats="greenhouse", company_handle=handle,
+                external_id=job_id,
+                title=title, location=location,
+                remote_flag=remote,
+                description=description[:2000],
+                url=apply_url,
+                posted_at=_parse_iso(posted),
+                department=None, raw=j,
+            ))
+        
+        if page >= total_pages:
+            break
+        page += 1
+        time.sleep(POLITE_DELAY / 2)
+    
+    time.sleep(POLITE_DELAY)
+    return out
+
+
 ADAPTERS: dict[str, Any] = {
     "greenhouse": fetch_greenhouse,
     "lever": fetch_lever,
@@ -346,7 +412,7 @@ def fetch_for(ats: str, handle: str) -> list[JobPosting]:
         _load_adzuna()
     if ats in ("getonboard", "jobicy", "remotive", "himalayas", "wwr", "remoterocketship") and ats not in ADAPTERS:
         _load_latam()
-    if ats in ("koombea", "tecla", "devlane", "parallelstaff", "distillery", "scopic", "nearsure", "rootstrap") and ats not in ADAPTERS:
+    if ats in ("koombea", "tecla", "devlane", "parallelstaff", "distillery", "scopic") and ats not in ADAPTERS:
         _load_playwright()
     fn = ADAPTERS.get(ats)
     if fn is None:
