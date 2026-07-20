@@ -321,10 +321,15 @@ def fetch_scopic(handle: str = "all") -> list[JobPosting]:
 # NEARSURE (job-boards.greenhouse.io - novo Greenhouse JS-rendered)
 # ──────────────────────────────────────────────────────────────────────
 def fetch_nearsure(handle: str = "all") -> list[JobPosting]:
+    """
+    Nearsure usa job-boards.greenhouse.io que carrega via iFrame.
+    Acessa o embed diretamente via URL do iFrame.
+    """
     from bs4 import BeautifulSoup
-    import re, json
+    import re
 
-    url = "https://job-boards.greenhouse.io/nearsure"
+    # URL do embed direto (sem iFrame wrapper)
+    embed_url = "https://job-boards.greenhouse.io/embed/job_board?for=nearsure"
     sync_playwright = _get_playwright()
     if not sync_playwright:
         return []
@@ -337,7 +342,7 @@ def fetch_nearsure(handle: str = "all") -> list[JobPosting]:
                 viewport={"width": 1280, "height": 800},
             )
             page = context.new_page()
-            page.goto(url, wait_until="networkidle", timeout=20000)
+            page.goto(embed_url, wait_until="networkidle", timeout=20000)
             time.sleep(3)
             html = page.content()
             browser.close()
@@ -349,6 +354,7 @@ def fetch_nearsure(handle: str = "all") -> list[JobPosting]:
     out: list[JobPosting] = []
     seen: set[str] = set()
 
+    # Links no embed têm formato /nearsure/jobs/XXXXXXXX
     for link in soup.find_all("a", href=re.compile(r"/nearsure/jobs/\d+")):
         title = link.get_text(" ", strip=True)
         href = link.get("href", "")
@@ -367,7 +373,7 @@ def fetch_nearsure(handle: str = "all") -> list[JobPosting]:
             raw={"_company_label": "Nearsure"},
         ))
 
-    logger.info("Nearsure: %d DE jobs", len(out))
+    logger.info("Nearsure: %d DE jobs (embed)", len(out))
     return out
 
 
@@ -378,7 +384,7 @@ def fetch_rootstrap(handle: str = "all") -> list[JobPosting]:
     from bs4 import BeautifulSoup
     import re
 
-    url = "https://job-boards.greenhouse.io/rootstrap"
+    url = "https://job-boards.greenhouse.io/embed/job_board?for=rootstrap"
     sync_playwright = _get_playwright()
     if not sync_playwright:
         return []
@@ -421,7 +427,7 @@ def fetch_rootstrap(handle: str = "all") -> list[JobPosting]:
             raw={"_company_label": "Rootstrap"},
         ))
 
-    logger.info("Rootstrap: %d DE jobs", len(out))
+    logger.info("Rootstrap: %d DE jobs (embed)", len(out))
     return out
 
 PLAYWRIGHT_ADAPTERS = {
