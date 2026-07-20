@@ -46,8 +46,6 @@ jobs:
             # GREENHOUSE
             {"name": "GoFasti", "url": "https://boards.greenhouse.io/gofasti", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "greenhouse", "handle": "gofasti"},
             {"name": "DistantJob", "url": "https://boards.greenhouse.io/distantjob", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "greenhouse", "handle": "distantjob"},
-            {"name": "Nearsure", "url": "https://job-boards.greenhouse.io/nearsure", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "greenhouse", "handle": "nearsure"},
-            {"name": "Rootstrap", "url": "https://job-boards.greenhouse.io/rootstrap", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "greenhouse", "handle": "rootstrap"},
             {"name": "Launchpad Technologies", "url": "https://boards.greenhouse.io/launchpadtechnologiesinc", "strategy": "usd_contractor", "tier_priority": "A", "phase": 1, "ats": "greenhouse", "handle": "launchpadtechnologiesinc"},
             {"name": "NimbleGravity", "url": "https://boards.greenhouse.io/nimblegravity", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "greenhouse", "handle": "nimblegravity"},
             {"name": "Turing", "url": "https://boards.greenhouse.io/turing", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "greenhouse", "handle": "turing"},
@@ -65,6 +63,8 @@ jobs:
             {"name": "ParallelStaff", "url": "https://parallelstaff.com/jobs/", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "parallelstaff", "handle": "all"},
             {"name": "Scopic", "url": "https://scopicsoftware.com/careers/", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "scopic", "handle": "all"},
             # MANUAL
+            {"name": "Nearsure (manual)", "url": "https://job-boards.greenhouse.io/nearsure", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
+            {"name": "Rootstrap (manual)", "url": "https://job-boards.greenhouse.io/rootstrap", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
             {"name": "Athyna", "url": "https://www.athyna.com/talent", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
             {"name": "Toptal", "url": "https://www.toptal.com/talent/apply", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
             {"name": "Andela", "url": "https://andela.com/talent", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
