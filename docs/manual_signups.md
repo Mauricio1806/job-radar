@@ -14,6 +14,8 @@ Pipeline não consegue scrapear; você precisa aplicar manualmente.
 | Braintrust | A | ⏳ manual | [apply](https://www.usebraintrust.com/join) | Marketplace token-based. |
 | Crossover | A | ⏳ manual | [apply](https://www.crossover.com/jobs) |  |
 | Gun.io | A | ⏳ manual | [apply](https://gun.io/find-work) |  |
+| Nearsure | A | ⏳ manual | [apply](https://job-boards.greenhouse.io/nearsure) | Playwright — novo Greenhouse JS. Sr Data Engineer aberta. |
+| Rootstrap | A | ⏳ manual | [apply](https://job-boards.greenhouse.io/rootstrap) | Playwright — novo Greenhouse JS. Argentina/Colombia/Uruguay. |
 | Terminal | A | ⏳ manual | [apply](https://www.terminal.io/engineers) |  |
 | Toptal | A | ⏳ manual | [apply](https://www.toptal.com/talent/apply) | Top 3%. Multi-step interview. |
 | X-Team | A | ⏳ manual | [apply](https://x-team.com/developers) | Long-term contracts. Alto DE demand. |
