@@ -322,58 +322,69 @@ def fetch_scopic(handle: str = "all") -> list[JobPosting]:
 # ──────────────────────────────────────────────────────────────────────
 def fetch_nearsure(handle: str = "all") -> list[JobPosting]:
     """
-    Nearsure usa job-boards.greenhouse.io que carrega via iFrame.
-    Acessa o embed diretamente via URL do iFrame.
+    Nearsure usa job-boards.greenhouse.io com React.
+    Usa Playwright pra interceptar a requisição JSON da API interna.
     """
-    from bs4 import BeautifulSoup
+    import json as _json
     import re
 
-    # URL do embed direto (sem iFrame wrapper)
-    embed_url = "https://job-boards.greenhouse.io/embed/job_board?for=nearsure"
     sync_playwright = _get_playwright()
     if not sync_playwright:
         return []
+
+    jobs_data = []
+
+    def handle_response(response):
+        try:
+            if "greenhouse.io" in response.url and "jobs" in response.url:
+                if response.status == 200:
+                    ct = response.headers.get("content-type", "")
+                    if "json" in ct:
+                        body = response.json()
+                        if isinstance(body, dict) and "jobs" in body:
+                            jobs_data.extend(body["jobs"])
+                        elif isinstance(body, list):
+                            jobs_data.extend(body)
+        except Exception:
+            pass
 
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             context = browser.new_context(
                 user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
-                viewport={"width": 1280, "height": 800},
             )
             page = context.new_page()
-            page.goto(embed_url, wait_until="networkidle", timeout=20000)
-            time.sleep(3)
-            html = page.content()
+            page.on("response", handle_response)
+            page.goto("https://job-boards.greenhouse.io/nearsure",
+                      wait_until="networkidle", timeout=20000)
+            time.sleep(4)
             browser.close()
     except Exception as exc:
         logger.warning("Nearsure Playwright failed: %s", exc)
         return []
 
-    soup = BeautifulSoup(html, "html.parser")
     out: list[JobPosting] = []
     seen: set[str] = set()
-
-    # Links no embed têm formato /nearsure/jobs/XXXXXXXX
-    for link in soup.find_all("a", href=re.compile(r"/nearsure/jobs/\d+")):
-        title = link.get_text(" ", strip=True)
-        href = link.get("href", "")
+    for j in jobs_data:
+        title = (j.get("title") or "").strip()
         if not title or not _is_de_title(title):
             continue
-        ext_id = href.split("/")[-1]
+        ext_id = str(j.get("id", ""))
         if ext_id in seen:
             continue
         seen.add(ext_id)
-        full_url = href if href.startswith("http") else f"https://job-boards.greenhouse.io{href}"
+        location = (j.get("location") or {}).get("name", "") or "Remote LATAM"
+        job_url = j.get("absolute_url") or f"https://job-boards.greenhouse.io/nearsure/jobs/{ext_id}"
         out.append(JobPosting(
             ats="playwright", company_handle="nearsure",
-            external_id=ext_id, title=title, location="Remote LATAM",
+            external_id=ext_id, title=title, location=location,
             remote_flag=True, description="",
-            url=full_url, posted_at=None,
+            url=job_url, posted_at=None,
             raw={"_company_label": "Nearsure"},
         ))
 
-    logger.info("Nearsure: %d DE jobs (embed)", len(out))
+    logger.info("Nearsure: %d DE jobs (network intercept)", len(out))
     return out
 
 
