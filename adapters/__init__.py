@@ -130,8 +130,15 @@ def fetch_greenhouse(handle: str) -> list[JobPosting]:
         return fetch_greenhouse_new(handle)
     jobs = data.get("jobs", []) if isinstance(data, dict) else []
     out: list[JobPosting] = []
+    cutoff = datetime.now(timezone.utc) - timedelta(days=30)
     for j in jobs:
         location = (j.get("location") or {}).get("name", "") or ""
+        posted = _parse_iso(j.get("updated_at"))
+        # Descarta vagas com mais de 30 dias (evergreen de staffing)
+        if posted and posted.tzinfo is None:
+            posted = posted.replace(tzinfo=timezone.utc)
+        if posted and posted < cutoff:
+            continue
         content = _strip_html(j.get("content", ""))
         out.append(JobPosting(
             ats="greenhouse", company_handle=handle,
@@ -139,7 +146,7 @@ def fetch_greenhouse(handle: str) -> list[JobPosting]:
             title=j.get("title", "").strip(), location=location,
             remote_flag=_detect_remote(location, content[:500]),
             description=content, url=j.get("absolute_url", ""),
-            posted_at=_parse_iso(j.get("updated_at")),
+            posted_at=posted,
             department=(j.get("departments", [{}])[0] or {}).get("name") if j.get("departments") else None,
             raw=j,
         ))
