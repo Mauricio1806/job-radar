@@ -158,10 +158,6 @@ def _parse_gob_job(item: dict, seen_ids: set) -> JobPosting | None:
     location = (", ".join(str(l) for l in locations[:2])
                 if isinstance(locations, list) else str(locations)) or "Remote LATAM"
 
-    # Bloqueia vagas restringidas a países que não incluem Brasil
-    if not _is_brazil_accessible(location, ""):
-        return None
-
     company_obj = attrs.get("company") or {}
     if isinstance(company_obj, dict):
         company_name = ((company_obj.get("data", {}) or {})
@@ -328,7 +324,8 @@ def fetch_wwr(handle: str = "data") -> list[JobPosting]:
     return out
 
 
-
+# ──────────────────────────────────────────────────────────────────────
+# REMOTE ROCKETSHIP — HTML scraping (RSS tem XML inválido)
 # ──────────────────────────────────────────────────────────────────────
 import re as _re
 
@@ -424,10 +421,152 @@ def fetch_jobicy(handle: str = "all") -> list[JobPosting]:
     return out
 
 
+
+
+# ──────────────────────────────────────────────────────────────────────
+# WELLFOUND (AngelList) — RSS feed startups US contratando LATAM
+# ──────────────────────────────────────────────────────────────────────
+WELLFOUND_FEEDS = [
+    "https://wellfound.com/jobs.rss?role=data-engineer&remote=true",
+    "https://wellfound.com/jobs.rss?role=analytics-engineer&remote=true",
+]
+
+def fetch_wellfound(handle: str = "all") -> list[JobPosting]:
+    seen: set[str] = set()
+    out: list[JobPosting] = []
+
+    for feed_url in WELLFOUND_FEEDS:
+        try:
+            resp = requests.get(feed_url, headers=HEADERS, timeout=TIMEOUT)
+            resp.raise_for_status()
+            if not resp.content.strip():
+                continue
+            root = ET.fromstring(resp.content)
+        except (requests.RequestException, ET.ParseError) as exc:
+            logger.warning("Wellfound [%s]: %s", feed_url[-40:], exc)
+            continue
+
+        for item in root.iter("item"):
+            title = (item.findtext("title") or "").strip()
+            link = (item.findtext("link") or "").strip()
+            description = _strip_html(item.findtext("description") or "")
+            pub_date = item.findtext("pubDate")
+
+            if not title or not link or not _is_de_title(title):
+                continue
+
+            ext_id = link.rstrip("/").split("/")[-1]
+            if ext_id in seen:
+                continue
+            seen.add(ext_id)
+
+            published_at = _parse_pubdate(pub_date)
+            if _is_too_old(published_at):
+                continue
+
+            # Empresa geralmente está no título "Role at Company"
+            company_name = "Unknown"
+            if " at " in title:
+                parts = title.rsplit(" at ", 1)
+                title = parts[0].strip()
+                company_name = parts[1].strip()
+
+            out.append(JobPosting(
+                ats="wellfound",
+                company_handle=company_name[:50],
+                external_id=ext_id,
+                title=title,
+                location="Remote",
+                remote_flag=True,
+                description=description[:2000],
+                url=link,
+                posted_at=published_at,
+                raw={"_company_label": company_name},
+            ))
+        time.sleep(POLITE_DELAY)
+
+    logger.info("Wellfound TOTAL: %d jobs", len(out))
+    return out
+
+
+# ──────────────────────────────────────────────────────────────────────
+# GET ON BOARD — Playwright pra search (422 na API REST)
+# ──────────────────────────────────────────────────────────────────────
+def fetch_getonboard_playwright(handle: str = "all") -> list[JobPosting]:
+    """
+    Usa Playwright pra acessar o search do Get on Board
+    que dá 422 via API REST mas funciona no browser.
+    """
+    from bs4 import BeautifulSoup
+    import re
+
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        logger.warning("Playwright não instalado — skip GOB search")
+        return []
+
+    search_terms = ["data engineer", "analytics engineer", "databricks engineer"]
+    seen: set[str] = set()
+    out: list[JobPosting] = []
+
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 800},
+            )
+            for term in search_terms:
+                try:
+                    page = context.new_page()
+                    url = f"https://www.getonbrd.com/search/jobs?q={term.replace(' ', '+')}&remote=true"
+                    page.goto(url, wait_until="networkidle", timeout=20000)
+                    import time as _time
+                    _time.sleep(3)
+                    html = page.content()
+                    page.close()
+
+                    soup = BeautifulSoup(html, "html.parser")
+                    for link in soup.find_all("a", href=re.compile(r"/jobs/[a-z0-9-]+")):
+                        href = link.get("href", "")
+                        title = link.get_text(" ", strip=True)
+                        if not title or not _is_de_title(title):
+                            continue
+                        ext_id = href.rstrip("/").split("/")[-1]
+                        if ext_id in seen:
+                            continue
+                        seen.add(ext_id)
+                        full_url = f"https://www.getonbrd.com{href}" if not href.startswith("http") else href
+                        out.append(JobPosting(
+                            ats="getonboard",
+                            company_handle="getonboard-search",
+                            external_id=ext_id,
+                            title=title,
+                            location="Remote LATAM",
+                            remote_flag=True,
+                            description="",
+                            url=full_url,
+                            posted_at=None,
+                            raw={"_company_label": "Get on Board"},
+                        ))
+                    logger.info("GOB Playwright search '%s': %d jobs total", term, len(out))
+                except Exception as exc:
+                    logger.warning("GOB Playwright search '%s': %s", term, exc)
+            browser.close()
+    except Exception as exc:
+        logger.warning("GOB Playwright failed: %s", exc)
+
+    logger.info("GetOnBoard Playwright TOTAL: %d jobs", len(out))
+    return out
+
+
 LATAM_ADAPTERS = {
     "getonboard": fetch_getonboard,
     "remotive": fetch_remotive,
     "himalayas": fetch_himalayas,
     "wwr": fetch_wwr,
-        "jobicy": fetch_jobicy,
+    "jobicy": fetch_jobicy,
+    "wellfound": fetch_wellfound,
+    "getonboard_pw": fetch_getonboard_playwright,
 }

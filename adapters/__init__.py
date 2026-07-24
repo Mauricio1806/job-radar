@@ -418,7 +418,7 @@ def _load_playwright():
 def fetch_for(ats: str, handle: str) -> list[JobPosting]:
     if ats == "adzuna" and "adzuna" not in ADAPTERS:
         _load_adzuna()
-    if ats in ("getonboard", "jobicy", "remotive", "himalayas", "wwr", "remoterocketship") and ats not in ADAPTERS:
+    if ats in ("getonboard", "jobicy", "remotive", "himalayas", "wwr", "wellfound", "getonboard_pw") and ats not in ADAPTERS:
         _load_latam()
     if ats in ("koombea", "tecla", "devlane", "parallelstaff", "distillery", "scopic") and ats not in ADAPTERS:
         _load_playwright()

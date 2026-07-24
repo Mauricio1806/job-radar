@@ -62,9 +62,10 @@ jobs:
             {"name": "Koombea", "url": "https://www.koombea.com/jobs/", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "koombea", "handle": "all"},
             {"name": "ParallelStaff", "url": "https://parallelstaff.com/jobs/", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "parallelstaff", "handle": "all"},
             {"name": "Scopic", "url": "https://scopicsoftware.com/careers/", "strategy": "usd_contractor", "tier_priority": "B", "phase": 1, "ats": "scopic", "handle": "all"},
+            # AGGREGATORS EXTRAS
+            {"name": "Wellfound", "url": "https://wellfound.com/jobs", "strategy": "job_board_aggregator", "tier_priority": "A", "phase": 1, "ats": "wellfound", "handle": "all"},
+            {"name": "Get on Board Search", "url": "https://www.getonbrd.com/search/jobs", "strategy": "job_board_aggregator", "tier_priority": "A", "phase": 1, "ats": "getonboard_pw", "handle": "all"},
             # MANUAL
-            {"name": "Nearsure (manual)", "url": "https://job-boards.greenhouse.io/nearsure", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
-            {"name": "Rootstrap (manual)", "url": "https://job-boards.greenhouse.io/rootstrap", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
             {"name": "Athyna", "url": "https://www.athyna.com/talent", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
             {"name": "Toptal", "url": "https://www.toptal.com/talent/apply", "strategy": "manual_network", "tier_priority": "A", "phase": 1},
             {"name": "Andela", "url": "https://andela.com/talent", "strategy": "manual_network", "tier_priority": "A", "phase": 1},

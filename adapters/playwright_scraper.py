@@ -321,70 +321,53 @@ def fetch_scopic(handle: str = "all") -> list[JobPosting]:
 # NEARSURE (job-boards.greenhouse.io - novo Greenhouse JS-rendered)
 # ──────────────────────────────────────────────────────────────────────
 def fetch_nearsure(handle: str = "all") -> list[JobPosting]:
-    """
-    Nearsure usa job-boards.greenhouse.io com React.
-    Usa Playwright pra interceptar a requisição JSON da API interna.
-    """
-    import json as _json
-    import re
+    from bs4 import BeautifulSoup
+    import re, json
 
+    url = "https://job-boards.greenhouse.io/nearsure"
     sync_playwright = _get_playwright()
     if not sync_playwright:
         return []
-
-    jobs_data = []
-
-    def handle_response(response):
-        try:
-            if "greenhouse.io" in response.url and "jobs" in response.url:
-                if response.status == 200:
-                    ct = response.headers.get("content-type", "")
-                    if "json" in ct:
-                        body = response.json()
-                        if isinstance(body, dict) and "jobs" in body:
-                            jobs_data.extend(body["jobs"])
-                        elif isinstance(body, list):
-                            jobs_data.extend(body)
-        except Exception:
-            pass
 
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             context = browser.new_context(
                 user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+                viewport={"width": 1280, "height": 800},
             )
             page = context.new_page()
-            page.on("response", handle_response)
-            page.goto("https://job-boards.greenhouse.io/nearsure",
-                      wait_until="networkidle", timeout=20000)
-            time.sleep(4)
+            page.goto(url, wait_until="networkidle", timeout=20000)
+            time.sleep(3)
+            html = page.content()
             browser.close()
     except Exception as exc:
         logger.warning("Nearsure Playwright failed: %s", exc)
         return []
 
+    soup = BeautifulSoup(html, "html.parser")
     out: list[JobPosting] = []
     seen: set[str] = set()
-    for j in jobs_data:
-        title = (j.get("title") or "").strip()
+
+    for link in soup.find_all("a", href=re.compile(r"/nearsure/jobs/\d+")):
+        title = link.get_text(" ", strip=True)
+        href = link.get("href", "")
         if not title or not _is_de_title(title):
             continue
-        ext_id = str(j.get("id", ""))
+        ext_id = href.split("/")[-1]
         if ext_id in seen:
             continue
         seen.add(ext_id)
-        location = (j.get("location") or {}).get("name", "") or "Remote LATAM"
-        job_url = j.get("absolute_url") or f"https://job-boards.greenhouse.io/nearsure/jobs/{ext_id}"
+        full_url = href if href.startswith("http") else f"https://job-boards.greenhouse.io{href}"
         out.append(JobPosting(
             ats="playwright", company_handle="nearsure",
-            external_id=ext_id, title=title, location=location,
+            external_id=ext_id, title=title, location="Remote LATAM",
             remote_flag=True, description="",
-            url=job_url, posted_at=None,
+            url=full_url, posted_at=None,
             raw={"_company_label": "Nearsure"},
         ))
 
-    logger.info("Nearsure: %d DE jobs (network intercept)", len(out))
+    logger.info("Nearsure: %d DE jobs", len(out))
     return out
 
 
@@ -395,7 +378,7 @@ def fetch_rootstrap(handle: str = "all") -> list[JobPosting]:
     from bs4 import BeautifulSoup
     import re
 
-    url = "https://job-boards.greenhouse.io/embed/job_board?for=rootstrap"
+    url = "https://job-boards.greenhouse.io/rootstrap"
     sync_playwright = _get_playwright()
     if not sync_playwright:
         return []
@@ -438,7 +421,7 @@ def fetch_rootstrap(handle: str = "all") -> list[JobPosting]:
             raw={"_company_label": "Rootstrap"},
         ))
 
-    logger.info("Rootstrap: %d DE jobs (embed)", len(out))
+    logger.info("Rootstrap: %d DE jobs", len(out))
     return out
 
 PLAYWRIGHT_ADAPTERS = {
