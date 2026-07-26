@@ -13,6 +13,7 @@ Pipeline não consegue scrapear; você precisa aplicar manualmente.
 | Athyna | A | ⏳ manual | [apply](https://www.athyna.com/talent) |  |
 | Braintrust | A | ⏳ manual | [apply](https://www.usebraintrust.com/join) |  |
 | Crossover | A | ⏳ manual | [apply](https://www.crossover.com/jobs) |  |
+| Data Meaning (manual) | A | ⏳ manual | [apply](https://datameaning.applytojob.com) |  |
 | Gun.io | A | ⏳ manual | [apply](https://gun.io/find-work) |  |
 | Nearsure (manual) | A | ⏳ manual | [apply](https://job-boards.greenhouse.io/nearsure) |  |
 | Rootstrap (manual) | A | ⏳ manual | [apply](https://job-boards.greenhouse.io/rootstrap) |  |
