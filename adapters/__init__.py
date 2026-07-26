@@ -1,6 +1,6 @@
 """
-Adapters — Registry central
-============================
+Adapters — Registry central v45
+================================
 """
 
 from __future__ import annotations
@@ -78,7 +78,8 @@ def _detect_remote(*texts: str) -> bool:
     haystack = " ".join(t.lower() for t in texts if t)
     return any(
         token in haystack
-        for token in ("remote", "anywhere", "work from home", "distributed", "home-based")
+        for token in ("remote", "anywhere", "work from home", "distributed", "home-based",
+                      "latam", "latin america", "remoto", "teletrabajo")
     )
 
 
@@ -102,43 +103,19 @@ def _parse_epoch_ms(value: Any) -> Optional[datetime]:
         return None
 
 
-# ─── ATS adapters existentes (Greenhouse, Lever, Ashby, etc.) ───
+# ── GREENHOUSE ─────────────────────────────────────────────────────────
 
-def fetch_greenhouse(handle: str) -> list[JobPosting]:
-    """
-    Suporta dois endpoints do Greenhouse:
-    - boards-api.greenhouse.io (API v1 clássica)
-    - job-boards.greenhouse.io/api/v1 (API v2 novo endpoint)
-    Tenta o clássico primeiro, se 404 tenta o novo.
-    """
-    data = None
-    for url in [
-        f"https://boards-api.greenhouse.io/v1/boards/{handle}/jobs",
-        f"https://job-boards.greenhouse.io/api/v1/boards/{handle}/jobs",
-    ]:
-        try:
-            data = _http_get(url, params={"content": "true"})
-            break
-        except AdapterError as exc:
-            if "404" in str(exc):
-                continue
-            raise
-    if data is None:
-        logger.warning("greenhouse %s: 404 em ambos endpoints clássicos, tentando _data=", handle)
-        return fetch_greenhouse_new(handle)
-    if data is None:
-        return fetch_greenhouse_new(handle)
-    jobs = data.get("jobs", []) if isinstance(data, dict) else []
+def _parse_greenhouse_jobs(handle: str, jobs: list) -> list[JobPosting]:
     out: list[JobPosting] = []
     cutoff = datetime.now(timezone.utc) - timedelta(days=30)
     for j in jobs:
         location = (j.get("location") or {}).get("name", "") or ""
         posted = _parse_iso(j.get("updated_at"))
-        # Descarta vagas com mais de 30 dias (evergreen de staffing)
-        if posted and posted.tzinfo is None:
-            posted = posted.replace(tzinfo=timezone.utc)
-        if posted and posted < cutoff:
-            continue
+        if posted:
+            if posted.tzinfo is None:
+                posted = posted.replace(tzinfo=timezone.utc)
+            if posted < cutoff:
+                continue
         content = _strip_html(j.get("content", ""))
         out.append(JobPosting(
             ats="greenhouse", company_handle=handle,
@@ -153,6 +130,72 @@ def fetch_greenhouse(handle: str) -> list[JobPosting]:
     time.sleep(POLITE_DELAY)
     return out
 
+
+def fetch_greenhouse_new(handle: str) -> list[JobPosting]:
+    """Greenhouse novo (job-boards.greenhouse.io) com endpoint JSON _data="""
+    headers_json = {**HEADERS, "Accept": "application/json"}
+    out: list[JobPosting] = []
+    page = 1
+    while True:
+        url = f"https://job-boards.greenhouse.io/{handle}"
+        try:
+            data = _http_get(url, params={"page": page, "_data": ""})
+        except AdapterError as exc:
+            logger.warning("greenhouse_new %s p%d: %s", handle, page, exc)
+            break
+        posts = []
+        if isinstance(data, dict):
+            job_posts = data.get("jobPosts") or {}
+            posts = job_posts.get("data", []) or []
+            total_pages = job_posts.get("total_pages", 1) or 1
+        elif isinstance(data, list):
+            posts = data
+            total_pages = 1
+        for j in posts:
+            title = (j.get("title") or "").strip()
+            location_obj = j.get("location") or {}
+            location = location_obj.get("name", "") if isinstance(location_obj, dict) else str(location_obj)
+            content_html = j.get("content", "") or j.get("description", "") or ""
+            description = _strip_html(content_html)
+            remote = _detect_remote(location, description[:500])
+            posted = _parse_iso(j.get("updated_at") or j.get("published_at"))
+            job_id = str(j.get("id", ""))
+            apply_url = j.get("absolute_url") or f"https://job-boards.greenhouse.io/{handle}/jobs/{job_id}"
+            out.append(JobPosting(
+                ats="greenhouse", company_handle=handle,
+                external_id=job_id, title=title, location=location,
+                remote_flag=remote, description=description[:2000],
+                url=apply_url, posted_at=posted, department=None, raw=j,
+            ))
+        if page >= total_pages:
+            break
+        page += 1
+        time.sleep(POLITE_DELAY / 2)
+    time.sleep(POLITE_DELAY)
+    return out
+
+
+def fetch_greenhouse(handle: str) -> list[JobPosting]:
+    data = None
+    for url in [
+        f"https://boards-api.greenhouse.io/v1/boards/{handle}/jobs",
+        f"https://job-boards.greenhouse.io/api/v3/boards/{handle}/jobs",
+    ]:
+        try:
+            data = _http_get(url, params={"content": "true"})
+            break
+        except AdapterError as exc:
+            if "404" in str(exc):
+                continue
+            raise
+    if data is None:
+        logger.warning("greenhouse %s: 404 em endpoints clássicos, tentando _data=", handle)
+        return fetch_greenhouse_new(handle)
+    jobs = data.get("jobs", []) if isinstance(data, dict) else []
+    return _parse_greenhouse_jobs(handle, jobs)
+
+
+# ── LEVER ──────────────────────────────────────────────────────────────
 
 def fetch_lever(handle: str) -> list[JobPosting]:
     url = f"https://api.lever.co/v0/postings/{handle}"
@@ -176,6 +219,41 @@ def fetch_lever(handle: str) -> list[JobPosting]:
     time.sleep(POLITE_DELAY)
     return out
 
+
+# ── ASHBY ──────────────────────────────────────────────────────────────
+
+def fetch_ashby(handle: str) -> list[JobPosting]:
+    """Ashby REST public API: GET /posting-api/job-board/{handle}"""
+    url = f"https://api.ashbyhq.com/posting-api/job-board/{handle}?includeCompensation=true"
+    try:
+        response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        response.raise_for_status()
+        data = response.json()
+    except (requests.RequestException, ValueError) as exc:
+        raise AdapterError(f"ashby {handle}: {exc}") from exc
+    postings = data.get("jobPostings", []) or []
+    out: list[JobPosting] = []
+    for p in postings:
+        title = (p.get("title") or "").strip()
+        location = p.get("locationName") or ""
+        remote = bool(p.get("isRemote", False)) or _detect_remote(location)
+        dept = p.get("departmentName") or p.get("teamName") or ""
+        published = p.get("publishedAt") or p.get("updatedAt")
+        job_id = p.get("id", "")
+        apply_url = p.get("applyUrl") or f"https://jobs.ashbyhq.com/{handle}/{job_id}"
+        out.append(JobPosting(
+            ats="ashby", company_handle=handle,
+            external_id=str(job_id), title=title, location=location,
+            remote_flag=remote,
+            description=_strip_html(p.get("descriptionHtml", ""))[:2000],
+            url=apply_url, posted_at=_parse_iso(published),
+            department=dept, raw=p,
+        ))
+    time.sleep(POLITE_DELAY)
+    return out
+
+
+# ── SMARTRECRUITERS ────────────────────────────────────────────────────
 
 def fetch_smartrecruiters(handle: str) -> list[JobPosting]:
     url = f"https://api.smartrecruiters.com/v1/companies/{handle}/postings"
@@ -211,6 +289,8 @@ def fetch_smartrecruiters(handle: str) -> list[JobPosting]:
     return out
 
 
+# ── WORKABLE ───────────────────────────────────────────────────────────
+
 def fetch_workable(handle: str) -> list[JobPosting]:
     url = f"https://apply.workable.com/api/v1/widget/accounts/{handle}"
     data = _http_get(url, params={"details": "true"})
@@ -226,169 +306,13 @@ def fetch_workable(handle: str) -> list[JobPosting]:
             description=_strip_html(j.get("description", "")),
             url=f"https://apply.workable.com/{handle}/j/{j.get('shortcode')}/",
             posted_at=_parse_iso(j.get("published")),
-            department=j.get("department"),
-            raw=j,
+            department=j.get("department"), raw=j,
         ))
     time.sleep(POLITE_DELAY)
     return out
 
 
-def fetch_personio(handle: str) -> list[JobPosting]:
-    """Personio expõe XML feed em {handle}.jobs.personio.com/xml"""
-    import xml.etree.ElementTree as ET
-    url = f"https://{handle}.jobs.personio.com/xml"
-    try:
-        response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
-        response.raise_for_status()
-    except requests.RequestException as exc:
-        raise AdapterError(f"personio {handle}: {exc}") from exc
-    try:
-        root = ET.fromstring(response.content)
-    except ET.ParseError as exc:
-        raise AdapterError(f"personio XML: {exc}") from exc
-    out: list[JobPosting] = []
-    for pos in root.iter("position"):
-        title = (pos.findtext("name") or "").strip()
-        pid = (pos.findtext("id") or "").strip()
-        office = (pos.findtext("office") or "").strip()
-        department = (pos.findtext("department") or "").strip()
-        recruiting_category = (pos.findtext("recruitingCategory") or "").strip()
-        subcompany = (pos.findtext("subcompany") or "").strip()
-        content_parts = []
-        for job_desc in pos.iter("jobDescription"):
-            name = (job_desc.findtext("name") or "")
-            value = (job_desc.findtext("value") or "")
-            content_parts.append(f"{name}: {value}")
-        description = _strip_html(" ".join(content_parts))
-        remote = _detect_remote(office, description[:300])
-        out.append(JobPosting(
-            ats="personio", company_handle=handle,
-            external_id=pid, title=title, location=office,
-            remote_flag=remote, description=description,
-            url=f"https://{handle}.jobs.personio.com/job/{pid}",
-            posted_at=None, department=department or recruiting_category,
-            raw={"subcompany": subcompany},
-        ))
-    time.sleep(POLITE_DELAY)
-    return out
-
-
-# Registry
-def fetch_ashby(handle: str) -> list[JobPosting]:
-    """Ashby usa GraphQL público."""
-    import json as _json
-    QUERY = """
-    query ApiJobBoardWithTeams($organizationHostedJobsPageName: String!) {
-      jobBoard: jobBoardWithTeams(organizationHostedJobsPageName: $organizationHostedJobsPageName) {
-        jobPostings {
-          id title locationName employmentType isRemote
-          publishedDate
-          jobPostingState
-          teams { name }
-          compensationTierSummary
-        }
-      }
-    }
-    """
-    try:
-        response = requests.post(
-            "https://jobs.ashbyhq.com/api/non-user-graphql?op=ApiJobBoardWithTeams",
-            json={"operationName": "ApiJobBoardWithTeams",
-                  "variables": {"organizationHostedJobsPageName": handle},
-                  "query": QUERY},
-            headers={**HEADERS, "Content-Type": "application/json"},
-            timeout=REQUEST_TIMEOUT,
-        )
-        response.raise_for_status()
-        data = response.json()
-    except (requests.RequestException, ValueError) as exc:
-        raise AdapterError(f"ashby {handle}: {exc}") from exc
-
-    postings = (data.get("data") or {}).get("jobBoard", {}).get("jobPostings", []) or []
-    out: list[JobPosting] = []
-    for p in postings:
-        title = (p.get("title") or "").strip()
-        location = p.get("locationName") or ""
-        remote = bool(p.get("isRemote", False)) or _detect_remote(location)
-        dept = (p.get("teams") or [{}])[0].get("name") if p.get("teams") else None
-        published = p.get("publishedDate")
-        url = f"https://jobs.ashbyhq.com/{handle}/{p.get('id', '')}"
-        out.append(JobPosting(
-            ats="ashby", company_handle=handle,
-            external_id=str(p.get("id", "")),
-            title=title, location=location,
-            remote_flag=remote, description="",
-            url=url,
-            posted_at=_parse_iso(published),
-            department=dept, raw=p,
-        ))
-    time.sleep(POLITE_DELAY)
-    return out
-
-
-def fetch_greenhouse_new(handle: str) -> list[JobPosting]:
-    """
-    Greenhouse novo (job-boards.greenhouse.io) com endpoint JSON _data=
-    GET https://job-boards.greenhouse.io/{handle}?page=1&_data=
-    Accept: application/json
-    Retorna: {"jobPosts": {"data": [...], "total_pages": N}}
-    """
-    headers_json = {**HEADERS, "Accept": "application/json"}
-    out: list[JobPosting] = []
-    page = 1
-    while True:
-        url = f"https://job-boards.greenhouse.io/{handle}"
-        try:
-            data = _http_get(url, params={"page": page, "_data": ""})
-        except AdapterError as exc:
-            logger.warning("greenhouse_new %s p%d: %s", handle, page, exc)
-            break
-        
-        posts = []
-        if isinstance(data, dict):
-            job_posts = data.get("jobPosts") or {}
-            posts = job_posts.get("data", []) or []
-            total_pages = job_posts.get("total_pages", 1) or 1
-        elif isinstance(data, list):
-            posts = data
-            total_pages = 1
-        
-        for j in posts:
-            title = (j.get("title") or "").strip()
-            location_obj = j.get("location") or {}
-            if isinstance(location_obj, dict):
-                location = location_obj.get("name", "") or ""
-            else:
-                location = str(location_obj) or ""
-            
-            content_html = j.get("content", "") or j.get("description", "") or ""
-            description = _strip_html(content_html)
-            remote = _detect_remote(location, description[:500])
-            
-            posted = j.get("updated_at") or j.get("published_at")
-            job_id = str(j.get("id", ""))
-            apply_url = (j.get("absolute_url") or 
-                        f"https://job-boards.greenhouse.io/{handle}/jobs/{job_id}")
-            
-            out.append(JobPosting(
-                ats="greenhouse", company_handle=handle,
-                external_id=job_id,
-                title=title, location=location,
-                remote_flag=remote,
-                description=description[:2000],
-                url=apply_url,
-                posted_at=_parse_iso(posted),
-                department=None, raw=j,
-            ))
-        
-        if page >= total_pages:
-            break
-        page += 1
-        time.sleep(POLITE_DELAY / 2)
-    
-    time.sleep(POLITE_DELAY)
-    return out
-
+# ── REGISTRY ───────────────────────────────────────────────────────────
 
 ADAPTERS: dict[str, Any] = {
     "greenhouse": fetch_greenhouse,
@@ -396,7 +320,6 @@ ADAPTERS: dict[str, Any] = {
     "ashby": fetch_ashby,
     "smartrecruiters": fetch_smartrecruiters,
     "workable": fetch_workable,
-    "personio": fetch_personio,
 }
 
 
@@ -415,12 +338,22 @@ def _load_playwright():
     ADAPTERS.update(PLAYWRIGHT_ADAPTERS)
 
 
+def _load_platform():
+    from adapters.platform_search import PLATFORM_ADAPTERS
+    ADAPTERS.update(PLATFORM_ADAPTERS)
+
+
 def fetch_for(ats: str, handle: str) -> list[JobPosting]:
     if ats == "adzuna" and "adzuna" not in ADAPTERS:
         _load_adzuna()
-    if ats in ("getonboard", "jobicy", "remotive", "himalayas", "wwr", "wellfound", "getonboard_pw") and ats not in ADAPTERS:
+    if ats in ("getonboard", "jobicy", "remotive", "himalayas", "wwr",
+               "wellfound", "getonboard_pw") and ats not in ADAPTERS:
         _load_latam()
-    if ats in ("koombea", "tecla", "devlane", "parallelstaff", "distillery", "scopic") and ats not in ADAPTERS:
+    if ats in ("ashby_global", "greenhouse_global", "lever_global",
+               "himalayas_global") and ats not in ADAPTERS:
+        _load_platform()
+    if ats in ("koombea", "tecla", "devlane", "parallelstaff", "distillery",
+               "scopic", "nearsure", "rootstrap") and ats not in ADAPTERS:
         _load_playwright()
     fn = ADAPTERS.get(ats)
     if fn is None:
